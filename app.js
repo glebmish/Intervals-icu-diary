@@ -89,9 +89,13 @@ function init() {
     });
 
     // Event delegation for wellness button selectors
-    wellnessForm.addEventListener('click', (e) => {
+    document.addEventListener('click', (e) => {
+        // Only handle clicks on selector buttons
         if (e.target.classList.contains('selector-btn')) {
+            e.preventDefault(); // Prevent any default behavior
             const buttonSelector = e.target.closest('.button-selector');
+            if (!buttonSelector) return;
+
             // Remove selected class from all buttons in this selector
             buttonSelector.querySelectorAll('.selector-btn').forEach(btn => {
                 btn.classList.remove('selected');
@@ -101,16 +105,14 @@ function init() {
         }
     });
 
-    // Event delegation for activity button selectors
-    activityForm.addEventListener('click', (e) => {
-        if (e.target.classList.contains('selector-btn')) {
-            const buttonSelector = e.target.closest('.button-selector');
-            // Remove selected class from all buttons in this selector
-            buttonSelector.querySelectorAll('.selector-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            // Add selected class to clicked button
-            e.target.classList.add('selected');
+    // Handle OK button clicks (in addition to OK & NEXT)
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('action-btn-primary') && e.target.textContent.trim() === 'OK') {
+            const form = e.target.closest('form');
+            if (form) {
+                e.preventDefault();
+                form.requestSubmit();
+            }
         }
     });
 }
@@ -384,11 +386,22 @@ function openWellnessForm(dateStr) {
     wellnessModal.classList.remove('hidden');
 }
 
+// Helper function to reset all button selectors in a form
+function resetButtonSelectors(form) {
+    const selectors = form.querySelectorAll('.button-selector');
+    selectors.forEach(selector => {
+        selector.querySelectorAll('.selector-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+    });
+}
+
 // Close modal
 function closeModal() {
     wellnessModal.classList.add('hidden');
     currentEditDate = null;
     wellnessForm.reset();
+    resetButtonSelectors(wellnessForm);
 }
 
 // Handle form submission
@@ -457,8 +470,10 @@ async function handleSubmitWellness(e) {
         console.error('Save error:', error);
     } finally {
         const submitBtn = wellnessForm.querySelector('button[type="submit"]');
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Save Wellness Data';
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'OK & NEXT';
+        }
     }
 }
 
@@ -501,6 +516,7 @@ function closeActivityModal() {
     activityModal.classList.add('hidden');
     currentEditActivityId = null;
     activityForm.reset();
+    resetButtonSelectors(activityForm);
 }
 
 // Handle activity form submission
@@ -561,8 +577,10 @@ async function handleSubmitActivity(e) {
         console.error('Save error:', error);
     } finally {
         const submitBtn = activityForm.querySelector('button[type="submit"]');
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Save Activity Data';
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'OK & NEXT';
+        }
     }
 }
 
