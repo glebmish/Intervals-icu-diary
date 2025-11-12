@@ -260,7 +260,7 @@ function renderDaysList() {
                                     ${day.activities.map(activity => {
                                         const activityComplete = isActivityComplete(activity);
                                         return `
-                                            <div class="activity-item ${activityComplete ? 'completed' : 'pending'}" onclick="event.stopPropagation(); window.openActivityForm(${activity.id}); return false;">
+                                            <div class="activity-item ${activityComplete ? 'completed' : 'pending'}" onclick="openActivityFormWrapper(event, ${activity.id})">
                                                 <div style="display: flex; align-items: center; flex: 1;">
                                                     <span class="activity-type">${activity.type || 'Activity'}</span>
                                                     <span class="activity-name">${activity.name || 'Unnamed Activity'}</span>
@@ -423,6 +423,13 @@ function openActivityForm(activityId) {
     activityModal.classList.remove('hidden');
 }
 
+// Wrapper function to handle activity click with proper event handling
+function openActivityFormWrapper(event, activityId) {
+    event.stopPropagation();
+    openActivityForm(activityId);
+    return false;
+}
+
 // Close activity modal
 function closeActivityModal() {
     activityModal.classList.add('hidden');
@@ -536,6 +543,7 @@ function hideApiKeyError() {
 // Make functions available globally for onclick handlers
 window.openWellnessForm = openWellnessForm;
 window.openActivityForm = openActivityForm;
+window.openActivityFormWrapper = openActivityFormWrapper;
 
 // Start the app
 init();
