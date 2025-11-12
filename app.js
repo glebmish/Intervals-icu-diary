@@ -84,7 +84,6 @@ function init() {
         if (activityItem) {
             e.stopPropagation();
             const activityId = activityItem.getAttribute('data-activity-id');
-            console.log('Activity clicked via delegation:', activityId);
             openActivityForm(activityId);
         }
     });
@@ -198,7 +197,6 @@ async function loadData() {
         }
 
         activitiesData = await activitiesResponse.json();
-        console.log('Loaded activities:', activitiesData.length, activitiesData);
 
         hideLoading();
         renderDaysList();
@@ -418,29 +416,24 @@ function isActivityComplete(activity) {
 
 // Open activity form for a specific activity
 function openActivityForm(activityId) {
-    console.log('openActivityForm called with ID:', activityId, typeof activityId);
-    console.log('activityModal element:', activityModal);
     currentEditActivityId = activityId;
     activityIdInput.value = activityId;
 
     // Find activity data - compare as strings since IDs come from data attributes
     const activity = activitiesData.find(a => String(a.id) === String(activityId));
-    console.log('Found activity:', activity);
     if (!activity) {
-        console.error('Activity not found! Looking for:', activityId, 'in', activitiesData.map(a => a.id));
         return;
     }
 
     // Populate form with existing data
+    document.getElementById('activityType').value = activity.type || '';
     document.getElementById('activityName').value = activity.name || '';
     document.getElementById('activityDescription').value = activity.description || '';
     document.getElementById('icuRpe').value = activity.icu_rpe || '';
     document.getElementById('feel').value = activity.feel || '';
 
     // Show modal
-    console.log('Removing hidden class from modal');
     activityModal.classList.remove('hidden');
-    console.log('Modal classes after removal:', activityModal.className);
 }
 
 // Close activity modal
@@ -458,6 +451,7 @@ async function handleSubmitActivity(e) {
 
     // Get form values
     const formData = {
+        type: document.getElementById('activityType').value || null,
         name: document.getElementById('activityName').value || null,
         description: document.getElementById('activityDescription').value || null,
         icu_rpe: parseInt(document.getElementById('icuRpe').value) || null,
@@ -558,5 +552,3 @@ window.openWellnessForm = openWellnessForm;
 
 // Start the app
 init();
-
-console.log('Intervals.icu Wellness Diary initialized!');
