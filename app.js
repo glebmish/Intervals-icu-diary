@@ -377,7 +377,6 @@ function openWellnessForm(dateStr) {
     setButtonSelectorValue('mood', wellness.mood !== undefined ? wellness.mood : 3);
     setButtonSelectorValue('motivation', wellness.motivation !== undefined ? wellness.motivation : 3);
     setButtonSelectorValue('injury', wellness.injury !== undefined ? wellness.injury : 2);
-    setButtonSelectorValue('hydration', wellness.hydration !== undefined ? wellness.hydration : null);
 
     // Populate textarea
     document.getElementById('comments').value = wellness.comments || '';
@@ -420,7 +419,6 @@ async function handleSubmitWellness(e) {
         mood: getButtonSelectorValue('mood'),
         motivation: getButtonSelectorValue('motivation'),
         injury: getButtonSelectorValue('injury'),
-        hydration: getButtonSelectorValue('hydration'),
         comments: document.getElementById('comments').value || null
     };
 

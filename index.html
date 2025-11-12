@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Intervals.icu Wellness Diary</title>
-    <link rel="stylesheet" href="styles.css?v=7">
+    <link rel="stylesheet" href="styles.css?v=8">
 </head>
 <body>
     <div class="container">
@@ -160,35 +160,14 @@
                             </div>
                         </div>
 
-                        <!-- Hydration -->
-                        <div class="wellness-field">
-                            <label class="wellness-label">Hydration</label>
-                            <div class="button-selector" data-field="hydration">
-                                <button type="button" class="selector-btn" data-value="1">GOOD</button>
-                                <button type="button" class="selector-btn" data-value="2">OK</button>
-                                <button type="button" class="selector-btn" data-value="3">POOR</button>
-                                <button type="button" class="selector-btn" data-value="4">BAD</button>
-                            </div>
-                        </div>
-
-                        <!-- Disable Auto Updates -->
-                        <div class="wellness-field checkbox-field">
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="disableAutoUpdate">
-                                <span>Disable automatic updates</span>
-                                <button type="button" class="help-icon" title="Prevents automatic wellness data updates">?</button>
-                            </label>
-                        </div>
-
                         <!-- Notes -->
-                        <div class="wellness-field">
+                        <div class="wellness-field notes-field">
                             <label class="wellness-label">Notes</label>
-                            <textarea id="comments" name="comments" class="form-control wellness-notes" rows="4" placeholder="Add your daily notes..."></textarea>
+                            <textarea id="comments" name="comments" class="form-control wellness-notes" rows="3" placeholder="Add your daily notes..."></textarea>
                         </div>
 
                         <!-- Action Bar -->
                         <div class="wellness-actions">
-                            <button type="button" class="action-btn">FIELDS ▼</button>
                             <div class="action-buttons-right">
                                 <button type="submit" class="action-btn action-btn-primary">OK & NEXT</button>
                                 <button type="button" id="cancelBtn" class="action-btn">CANCEL</button>
@@ -212,9 +191,9 @@
                         <input type="hidden" id="activityId">
 
                         <!-- Comments - Most Prominent -->
-                        <div class="wellness-field">
+                        <div class="wellness-field notes-field">
                             <label class="wellness-label prominent-label">Comments</label>
-                            <textarea id="activityDescription" name="description" class="form-control wellness-notes prominent-textarea" rows="6" placeholder="Add notes about this activity..."></textarea>
+                            <textarea id="activityDescription" name="description" class="form-control wellness-notes prominent-textarea" rows="4" placeholder="Add notes about this activity..."></textarea>
                         </div>
 
                         <!-- Activity Type -->
@@ -273,7 +252,6 @@
 
                         <!-- Action Bar -->
                         <div class="wellness-actions">
-                            <button type="button" class="action-btn">FIELDS ▼</button>
                             <div class="action-buttons-right">
                                 <button type="submit" class="action-btn action-btn-primary">OK & NEXT</button>
                                 <button type="button" id="cancelActivityBtn" class="action-btn">CANCEL</button>
@@ -291,6 +269,6 @@
         <p>This app stores your API key locally in your browser only</p>
     </footer>
 
-    <script src="app.js?v=7"></script>
+    <script src="app.js?v=8"></script>
 </body>
 </html>
