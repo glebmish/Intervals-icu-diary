@@ -1,6 +1,6 @@
 # GitHub Pages Setup Instructions
 
-This guide will help you deploy the User Directory web app to GitHub Pages.
+This guide will help you deploy the Intervals.icu Workout Diary web app to GitHub Pages.
 
 ## What is GitHub Pages?
 
@@ -59,14 +59,14 @@ If you prefer automated deployments:
 
 Once deployed, you should see:
 - A purple gradient background
-- "User Directory" title
-- Three buttons: "Load Users", "Load Posts", and "Load Photos"
-- Clicking any button should fetch and display data from the API
+- "Intervals.icu Workout Diary" title
+- A form prompting you to enter your API key
 
 ## Features of the Deployed App
 
 The app demonstrates:
-- **API Integration**: Fetches data from JSONPlaceholder test API
+- **API Integration**: Fetches workout data from Intervals.icu API
+- **Secure Storage**: API key stored locally in browser only
 - **Responsive Design**: Works on desktop, tablet, and mobile
 - **Modern UI**: Gradient backgrounds, smooth animations, card layouts
 - **Error Handling**: Displays error messages if API calls fail
@@ -74,9 +74,21 @@ The app demonstrates:
 
 ## Testing the Deployed App
 
-1. Click "Load Users" - should display 10 user cards with contact info
-2. Click "Load Posts" - should display 10 blog post cards
-3. Click "Load Photos" - should display 12 photo thumbnail cards
+1. **Get your API key**:
+   - Log in to [Intervals.icu](https://intervals.icu)
+   - Go to Settings → Developer Settings
+   - Generate a new API key
+   - Copy the key
+
+2. **Enter your API key**:
+   - Paste your API key into the input field
+   - Click "Connect"
+   - The app will validate your key
+
+3. **View your workout**:
+   - After successful connection, you'll see your last completed workout
+   - All available metrics will be displayed (duration, distance, HR, power, etc.)
+   - Click "View on Intervals.icu" to see the full workout details
 
 ## Troubleshooting
 
@@ -85,10 +97,17 @@ The app demonstrates:
 - Check that the branch selected in settings is correct
 - Verify that `index.html` is in the root directory
 
-### API Not Working
+### API Key Issues
+- **"Invalid API key" error**: Verify you copied the complete key from Intervals.icu
+- **"Failed to connect" error**: Check your internet connection
+- **API key not saving**: Ensure your browser allows localStorage
+- **Need to change API key**: Click the "Change API Key" button in the top right
 - Check browser console for errors (F12 or right-click → Inspect → Console)
-- Verify internet connection
-- JSONPlaceholder API might be temporarily down (rare)
+
+### No Workouts Showing
+- Ensure you have at least one completed workout in Intervals.icu
+- Check that your workouts are synced from your fitness device
+- Verify your Intervals.icu account is active
 
 ### 404 Error
 - Ensure the repository name in the URL matches exactly
@@ -131,14 +150,14 @@ To use a custom domain:
 
 ## API Information
 
-This app uses **JSONPlaceholder** (https://jsonplaceholder.typicode.com/):
-- Free fake REST API for testing
-- No authentication required
-- No rate limits for reasonable use
+This app uses **Intervals.icu API** (https://intervals.icu/api/v1):
+- Official Intervals.icu REST API
+- Requires API key authentication
+- API keys are generated in your Intervals.icu account settings
 - Endpoints used:
-  - `/users` - User data
-  - `/posts` - Blog posts
-  - `/photos` - Photo albums
+  - `/athlete/i0` - Get current athlete information (for validation)
+  - `/athlete/i0/activities` - Get recent activities/workouts
+- Documentation: https://intervals.icu/api-docs.html
 
 ## Local Testing
 
@@ -178,10 +197,15 @@ Intervals-icu-diary/
 
 ## Security Notes
 
-- This is a frontend-only app with no backend
-- No user data is collected or stored
-- All API calls are made directly from the browser
-- No sensitive information should be added to frontend code
+- This is a frontend-only app with no backend server
+- Your API key is stored **only** in your browser's localStorage
+- The API key never leaves your browser except to authenticate with Intervals.icu directly
+- No user data is collected, tracked, or sent to any third party
+- All API calls are made directly from your browser to Intervals.icu
+- You can clear your API key at any time using the "Change API Key" button
+- If you're concerned about security, you can revoke and regenerate your API key in Intervals.icu settings
+
+**Important**: Never share your API key with anyone, and avoid taking screenshots that show your API key.
 
 ## Need Help?
 
