@@ -77,6 +77,17 @@ function init() {
             closeActivityModal();
         }
     });
+
+    // Event delegation for activity item clicks
+    workoutContent.addEventListener('click', (e) => {
+        const activityItem = e.target.closest('.activity-item');
+        if (activityItem) {
+            e.stopPropagation();
+            const activityId = activityItem.getAttribute('data-activity-id');
+            console.log('Activity clicked via delegation:', activityId);
+            openActivityForm(activityId);
+        }
+    });
 }
 
 // Show API Key Screen
@@ -261,7 +272,7 @@ function renderDaysList() {
                                     ${day.activities.map(activity => {
                                         const activityComplete = isActivityComplete(activity);
                                         return `
-                                            <div class="activity-item ${activityComplete ? 'completed' : 'pending'}" onclick="openActivityFormWrapper(event, '${activity.id}')">
+                                            <div class="activity-item ${activityComplete ? 'completed' : 'pending'}" data-activity-id="${activity.id}">
                                                 <div style="display: flex; align-items: center; flex: 1;">
                                                     <span class="activity-type">${activity.type || 'Activity'}</span>
                                                     <span class="activity-name">${activity.name || 'Unnamed Activity'}</span>
@@ -407,16 +418,16 @@ function isActivityComplete(activity) {
 
 // Open activity form for a specific activity
 function openActivityForm(activityId) {
-    console.log('openActivityForm called with ID:', activityId);
+    console.log('openActivityForm called with ID:', activityId, typeof activityId);
     console.log('activityModal element:', activityModal);
     currentEditActivityId = activityId;
     activityIdInput.value = activityId;
 
-    // Find activity data
-    const activity = activitiesData.find(a => a.id === activityId);
+    // Find activity data - compare as strings since IDs come from data attributes
+    const activity = activitiesData.find(a => String(a.id) === String(activityId));
     console.log('Found activity:', activity);
     if (!activity) {
-        console.error('Activity not found!');
+        console.error('Activity not found! Looking for:', activityId, 'in', activitiesData.map(a => a.id));
         return;
     }
 
@@ -430,17 +441,6 @@ function openActivityForm(activityId) {
     console.log('Removing hidden class from modal');
     activityModal.classList.remove('hidden');
     console.log('Modal classes after removal:', activityModal.className);
-}
-
-// Wrapper function to handle activity click with proper event handling
-function openActivityFormWrapper(event, activityId) {
-    console.log('Activity clicked:', activityId);
-    event.stopPropagation();
-    event.preventDefault();
-    // Convert to number if it's a string
-    const id = typeof activityId === 'string' ? parseInt(activityId) : activityId;
-    openActivityForm(id);
-    return false;
 }
 
 // Close activity modal
@@ -493,7 +493,7 @@ async function handleSubmitActivity(e) {
         }
 
         // Update local data
-        const existingIndex = activitiesData.findIndex(a => a.id === parseInt(activityId));
+        const existingIndex = activitiesData.findIndex(a => String(a.id) === String(activityId));
         if (existingIndex >= 0) {
             activitiesData[existingIndex] = { ...activitiesData[existingIndex], ...cleanedData };
         }
@@ -555,8 +555,6 @@ function hideApiKeyError() {
 
 // Make functions available globally for onclick handlers
 window.openWellnessForm = openWellnessForm;
-window.openActivityForm = openActivityForm;
-window.openActivityFormWrapper = openActivityFormWrapper;
 
 // Start the app
 init();
