@@ -87,6 +87,19 @@ function init() {
             openActivityForm(activityId);
         }
     });
+
+    // Event delegation for wellness button selectors
+    wellnessForm.addEventListener('click', (e) => {
+        if (e.target.classList.contains('selector-btn')) {
+            const buttonSelector = e.target.closest('.button-selector');
+            // Remove selected class from all buttons in this selector
+            buttonSelector.querySelectorAll('.selector-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            // Add selected class to clicked button
+            e.target.classList.add('selected');
+        }
+    });
 }
 
 // Show API Key Screen
@@ -305,6 +318,34 @@ function isDayComplete(wellness) {
     });
 }
 
+// Helper function to set button selector value
+function setButtonSelectorValue(fieldName, value) {
+    const selector = document.querySelector(`[data-field="${fieldName}"]`);
+    if (!selector) return;
+
+    // Remove selected from all buttons
+    selector.querySelectorAll('.selector-btn').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+
+    // Select the button with matching value
+    if (value !== null && value !== undefined && value !== '') {
+        const button = selector.querySelector(`[data-value="${value}"]`);
+        if (button) {
+            button.classList.add('selected');
+        }
+    }
+}
+
+// Helper function to get button selector value
+function getButtonSelectorValue(fieldName) {
+    const selector = document.querySelector(`[data-field="${fieldName}"]`);
+    if (!selector) return null;
+
+    const selectedBtn = selector.querySelector('.selector-btn.selected');
+    return selectedBtn ? parseInt(selectedBtn.getAttribute('data-value')) : null;
+}
+
 // Open wellness form for a specific date
 function openWellnessForm(dateStr) {
     currentEditDate = dateStr;
@@ -313,14 +354,17 @@ function openWellnessForm(dateStr) {
     // Find wellness data for this date
     const wellness = wellnessData.find(w => w.id === dateStr) || {};
 
-    // Populate form with existing data
-    document.getElementById('sleepQuality').value = wellness.sleepQuality || '';
-    document.getElementById('soreness').value = wellness.soreness !== undefined ? wellness.soreness : '';
-    document.getElementById('fatigue').value = wellness.fatigue !== undefined ? wellness.fatigue : '';
-    document.getElementById('stress').value = wellness.stress !== undefined ? wellness.stress : '';
-    document.getElementById('mood').value = wellness.mood || '';
-    document.getElementById('motivation').value = wellness.motivation || '';
-    document.getElementById('injury').value = wellness.injury || '';
+    // Populate button selectors with existing data or defaults
+    setButtonSelectorValue('sleepQuality', wellness.sleepQuality !== undefined ? wellness.sleepQuality : 2);
+    setButtonSelectorValue('soreness', wellness.soreness !== undefined ? wellness.soreness : 1);
+    setButtonSelectorValue('fatigue', wellness.fatigue !== undefined ? wellness.fatigue : 1);
+    setButtonSelectorValue('stress', wellness.stress !== undefined ? wellness.stress : 2);
+    setButtonSelectorValue('mood', wellness.mood !== undefined ? wellness.mood : 3);
+    setButtonSelectorValue('motivation', wellness.motivation !== undefined ? wellness.motivation : 3);
+    setButtonSelectorValue('injury', wellness.injury !== undefined ? wellness.injury : 2);
+    setButtonSelectorValue('hydration', wellness.hydration !== undefined ? wellness.hydration : null);
+
+    // Populate textarea
     document.getElementById('comments').value = wellness.comments || '';
 
     // Show modal
@@ -340,16 +384,17 @@ async function handleSubmitWellness(e) {
 
     const dateStr = wellnessDateInput.value;
 
-    // Get form values
+    // Get form values from button selectors
     const formData = {
         id: dateStr,
-        sleepQuality: parseInt(document.getElementById('sleepQuality').value) || null,
-        soreness: document.getElementById('soreness').value !== '' ? parseInt(document.getElementById('soreness').value) : null,
-        fatigue: document.getElementById('fatigue').value !== '' ? parseInt(document.getElementById('fatigue').value) : null,
-        stress: document.getElementById('stress').value !== '' ? parseInt(document.getElementById('stress').value) : null,
-        mood: parseInt(document.getElementById('mood').value) || null,
-        motivation: parseInt(document.getElementById('motivation').value) || null,
-        injury: parseInt(document.getElementById('injury').value) || null,
+        sleepQuality: getButtonSelectorValue('sleepQuality'),
+        soreness: getButtonSelectorValue('soreness'),
+        fatigue: getButtonSelectorValue('fatigue'),
+        stress: getButtonSelectorValue('stress'),
+        mood: getButtonSelectorValue('mood'),
+        motivation: getButtonSelectorValue('motivation'),
+        injury: getButtonSelectorValue('injury'),
+        hydration: getButtonSelectorValue('hydration'),
         comments: document.getElementById('comments').value || null
     };
 
