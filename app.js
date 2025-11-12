@@ -260,7 +260,7 @@ function renderDaysList() {
                                     ${day.activities.map(activity => {
                                         const activityComplete = isActivityComplete(activity);
                                         return `
-                                            <div class="activity-item ${activityComplete ? 'completed' : 'pending'}" onclick="event.stopPropagation(); openActivityForm(${activity.id})">
+                                            <div class="activity-item ${activityComplete ? 'completed' : 'pending'}" onclick="event.stopPropagation(); window.openActivityForm(${activity.id}); return false;">
                                                 <div style="display: flex; align-items: center; flex: 1;">
                                                     <span class="activity-type">${activity.type || 'Activity'}</span>
                                                     <span class="activity-name">${activity.name || 'Unnamed Activity'}</span>
@@ -413,10 +413,8 @@ function openActivityForm(activityId) {
     const activity = activitiesData.find(a => a.id === activityId);
     if (!activity) return;
 
-    // Set title
-    activityTitle.textContent = activity.name || 'Unnamed Activity';
-
     // Populate form with existing data
+    document.getElementById('activityName').value = activity.name || '';
     document.getElementById('activityDescription').value = activity.description || '';
     document.getElementById('icuRpe').value = activity.icu_rpe || '';
     document.getElementById('feel').value = activity.feel || '';
@@ -440,6 +438,7 @@ async function handleSubmitActivity(e) {
 
     // Get form values
     const formData = {
+        name: document.getElementById('activityName').value || null,
         description: document.getElementById('activityDescription').value || null,
         icu_rpe: parseInt(document.getElementById('icuRpe').value) || null,
         feel: parseInt(document.getElementById('feel').value) || null
