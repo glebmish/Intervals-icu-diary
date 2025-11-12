@@ -81,7 +81,7 @@ See [GITHUB_PAGES_SETUP.md](GITHUB_PAGES_SETUP.md) for detailed deployment instr
 
 This app uses the official Intervals.icu API:
 - Base URL: `https://intervals.icu/api/v1`
-- Authentication: Bearer Token (Authorization: Bearer <your_api_key>)
+- Authentication: HTTP Basic Auth with username `API_KEY` and password as your API key
 - Documentation: https://intervals.icu/api-docs.html
 - Forum: https://forum.intervals.icu/
 

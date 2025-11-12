@@ -67,9 +67,11 @@ async function handleSaveApiKey() {
     saveApiKeyBtn.textContent = 'Connecting...';
 
     try {
+        // Intervals.icu uses Basic Auth with username "API_KEY" and password as the API key
+        const credentials = btoa(`API_KEY:${key}`);
         const response = await fetch(`${API_BASE}/athlete/0`, {
             headers: {
-                'Authorization': `Bearer ${key}`
+                'Authorization': `Basic ${credentials}`
             }
         });
 
@@ -110,9 +112,10 @@ async function loadLastWorkout() {
         hideError();
 
         // Fetch activities - we'll get the most recent ones
+        const credentials = btoa(`API_KEY:${apiKey}`);
         const response = await fetch(`${API_BASE}/athlete/0/activities`, {
             headers: {
-                'Authorization': `Bearer ${apiKey}`
+                'Authorization': `Basic ${credentials}`
             }
         });
 
