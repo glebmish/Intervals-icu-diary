@@ -1,7 +1,6 @@
 // Constants
 const INTERVALS_ICU_BASE = 'https://intervals.icu';
 const API_BASE = `${INTERVALS_ICU_BASE}/api/v1`;
-const API_USERNAME = 'API_KEY';
 const STORAGE_KEY = 'intervals_icu_api_key';
 
 // DOM Elements
@@ -70,7 +69,7 @@ async function handleSaveApiKey() {
     try {
         const response = await fetch(`${API_BASE}/athlete/0`, {
             headers: {
-                'Authorization': 'Basic ' + btoa(`${API_USERNAME}:${key}`)
+                'Authorization': `Bearer ${key}`
             }
         });
 
@@ -113,7 +112,7 @@ async function loadLastWorkout() {
         // Fetch activities - we'll get the most recent ones
         const response = await fetch(`${API_BASE}/athlete/0/activities`, {
             headers: {
-                'Authorization': 'Basic ' + btoa(`${API_USERNAME}:${apiKey}`)
+                'Authorization': `Bearer ${apiKey}`
             }
         });
 
