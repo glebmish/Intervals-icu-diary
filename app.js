@@ -100,6 +100,19 @@ function init() {
             e.target.classList.add('selected');
         }
     });
+
+    // Event delegation for activity button selectors
+    activityForm.addEventListener('click', (e) => {
+        if (e.target.classList.contains('selector-btn')) {
+            const buttonSelector = e.target.closest('.button-selector');
+            // Remove selected class from all buttons in this selector
+            buttonSelector.querySelectorAll('.selector-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            // Add selected class to clicked button
+            e.target.classList.add('selected');
+        }
+    });
 }
 
 // Show API Key Screen
@@ -474,8 +487,10 @@ function openActivityForm(activityId) {
     document.getElementById('activityType').value = activity.type || '';
     document.getElementById('activityName').value = activity.name || '';
     document.getElementById('activityDescription').value = activity.description || '';
-    document.getElementById('icuRpe').value = activity.icu_rpe || '';
-    document.getElementById('feel').value = activity.feel || '';
+
+    // Populate button selectors
+    setButtonSelectorValue('activityRpe', activity.icu_rpe || null);
+    setButtonSelectorValue('activityFeel', activity.feel || null);
 
     // Show modal
     activityModal.classList.remove('hidden');
@@ -499,8 +514,8 @@ async function handleSubmitActivity(e) {
         type: document.getElementById('activityType').value || null,
         name: document.getElementById('activityName').value || null,
         description: document.getElementById('activityDescription').value || null,
-        icu_rpe: parseInt(document.getElementById('icuRpe').value) || null,
-        feel: parseInt(document.getElementById('feel').value) || null
+        icu_rpe: getButtonSelectorValue('activityRpe'),
+        feel: getButtonSelectorValue('activityFeel')
     };
 
     // Remove null values

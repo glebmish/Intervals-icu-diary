@@ -753,6 +753,33 @@ textarea.form-control {
     font-weight: 700;
 }
 
+/* Prominent styles for comments */
+.prominent-label {
+    font-size: 1.1em;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.prominent-textarea {
+    min-height: 120px;
+    font-size: 1em;
+    border: 2px solid #dee2e6;
+}
+
+.prominent-textarea:focus {
+    border-color: #2c3e50;
+    box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
+}
+
+/* RPE selector with 10 buttons */
+.rpe-selector {
+    grid-template-columns: repeat(10, 1fr);
+}
+
+.rpe-selector .selector-btn {
+    padding: 12px 4px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .container {
@@ -832,5 +859,13 @@ textarea.form-control {
     .activity-status {
         width: 100%;
         justify-content: flex-end;
+    }
+
+    .rpe-selector {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    .rpe-selector .selector-btn {
+        padding: 12px 8px;
     }
 }

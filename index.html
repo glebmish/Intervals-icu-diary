@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Intervals.icu Wellness Diary</title>
-    <link rel="stylesheet" href="styles.css?v=5">
+    <link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
     <div class="container">
@@ -211,8 +211,15 @@
                     <form id="activityForm">
                         <input type="hidden" id="activityId">
 
-                        <div class="form-group full-width">
-                            <label for="activityType">Activity Type</label>
+                        <!-- Comments - Most Prominent -->
+                        <div class="wellness-field">
+                            <label class="wellness-label prominent-label">Comments</label>
+                            <textarea id="activityDescription" name="description" class="form-control wellness-notes prominent-textarea" rows="6" placeholder="Add notes about this activity..."></textarea>
+                        </div>
+
+                        <!-- Activity Type -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">Activity Type</label>
                             <select id="activityType" name="type" class="form-control">
                                 <option value="">Not set</option>
                                 <option value="Run">Run</option>
@@ -229,50 +236,49 @@
                             </select>
                         </div>
 
-                        <div class="form-group full-width">
-                            <label for="activityName">Activity Name</label>
+                        <!-- Activity Name -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">Activity Name</label>
                             <input type="text" id="activityName" name="name" class="form-control" placeholder="e.g., Morning Run, Evening Ride...">
                         </div>
 
-                        <div class="form-group full-width">
-                            <label for="activityDescription">Comments</label>
-                            <textarea id="activityDescription" name="description" class="form-control" rows="4" placeholder="Add notes about this activity..."></textarea>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="icuRpe">RPE (Rate of Perceived Exertion)</label>
-                                <select id="icuRpe" name="icu_rpe" class="form-control">
-                                    <option value="">Not set</option>
-                                    <option value="1">1 - Very Easy</option>
-                                    <option value="2">2 - Easy</option>
-                                    <option value="3">3 - Moderate</option>
-                                    <option value="4">4 - Somewhat Hard</option>
-                                    <option value="5">5 - Hard</option>
-                                    <option value="6">6</option>
-                                    <option value="7">7 - Very Hard</option>
-                                    <option value="8">8</option>
-                                    <option value="9">9 - Extremely Hard</option>
-                                    <option value="10">10 - Max Effort</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="feel">Feel</label>
-                                <select id="feel" name="feel" class="form-control">
-                                    <option value="">Not set</option>
-                                    <option value="1">1 - Terrible</option>
-                                    <option value="2">2 - Poor</option>
-                                    <option value="3">3 - Average</option>
-                                    <option value="4">4 - Good</option>
-                                    <option value="5">5 - Great</option>
-                                </select>
+                        <!-- RPE -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">RPE (Rate of Perceived Exertion)</label>
+                            <div class="button-selector rpe-selector" data-field="activityRpe">
+                                <button type="button" class="selector-btn" data-value="1">1</button>
+                                <button type="button" class="selector-btn" data-value="2">2</button>
+                                <button type="button" class="selector-btn" data-value="3">3</button>
+                                <button type="button" class="selector-btn" data-value="4">4</button>
+                                <button type="button" class="selector-btn" data-value="5">5</button>
+                                <button type="button" class="selector-btn" data-value="6">6</button>
+                                <button type="button" class="selector-btn" data-value="7">7</button>
+                                <button type="button" class="selector-btn" data-value="8">8</button>
+                                <button type="button" class="selector-btn" data-value="9">9</button>
+                                <button type="button" class="selector-btn" data-value="10">10</button>
                             </div>
                         </div>
 
-                        <div class="form-actions">
-                            <button type="button" id="cancelActivityBtn" class="btn btn-secondary">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Save Activity Data</button>
+                        <!-- Feel -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">Feel</label>
+                            <div class="button-selector" data-field="activityFeel">
+                                <button type="button" class="selector-btn" data-value="1">TERRIBLE</button>
+                                <button type="button" class="selector-btn" data-value="2">POOR</button>
+                                <button type="button" class="selector-btn" data-value="3">AVG</button>
+                                <button type="button" class="selector-btn" data-value="4">GOOD</button>
+                                <button type="button" class="selector-btn" data-value="5">GREAT</button>
+                            </div>
+                        </div>
+
+                        <!-- Action Bar -->
+                        <div class="wellness-actions">
+                            <button type="button" class="action-btn">FIELDS ▼</button>
+                            <div class="action-buttons-right">
+                                <button type="submit" class="action-btn action-btn-primary">OK & NEXT</button>
+                                <button type="button" id="cancelActivityBtn" class="action-btn">CANCEL</button>
+                                <button type="button" class="action-btn action-btn-primary">OK</button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -285,6 +291,6 @@
         <p>This app stores your API key locally in your browser only</p>
     </footer>
 
-    <script src="app.js?v=5"></script>
+    <script src="app.js?v=6"></script>
 </body>
 </html>
