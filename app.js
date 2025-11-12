@@ -187,6 +187,7 @@ async function loadData() {
         }
 
         activitiesData = await activitiesResponse.json();
+        console.log('Loaded activities:', activitiesData.length, activitiesData);
 
         hideLoading();
         renderDaysList();
@@ -406,12 +407,18 @@ function isActivityComplete(activity) {
 
 // Open activity form for a specific activity
 function openActivityForm(activityId) {
+    console.log('openActivityForm called with ID:', activityId);
+    console.log('activityModal element:', activityModal);
     currentEditActivityId = activityId;
     activityIdInput.value = activityId;
 
     // Find activity data
     const activity = activitiesData.find(a => a.id === activityId);
-    if (!activity) return;
+    console.log('Found activity:', activity);
+    if (!activity) {
+        console.error('Activity not found!');
+        return;
+    }
 
     // Populate form with existing data
     document.getElementById('activityName').value = activity.name || '';
@@ -420,12 +427,16 @@ function openActivityForm(activityId) {
     document.getElementById('feel').value = activity.feel || '';
 
     // Show modal
+    console.log('Removing hidden class from modal');
     activityModal.classList.remove('hidden');
+    console.log('Modal classes after removal:', activityModal.className);
 }
 
 // Wrapper function to handle activity click with proper event handling
 function openActivityFormWrapper(event, activityId) {
+    console.log('Activity clicked:', activityId);
     event.stopPropagation();
+    event.preventDefault();
     openActivityForm(activityId);
     return false;
 }
