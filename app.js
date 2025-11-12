@@ -66,7 +66,7 @@ async function handleSaveApiKey() {
     saveApiKeyBtn.textContent = 'Connecting...';
 
     try {
-        const response = await fetch(`${API_BASE}/athlete/i0`, {
+        const response = await fetch(`${API_BASE}/athlete/0`, {
             headers: {
                 'Authorization': 'Basic ' + btoa('API_KEY:' + key)
             }
@@ -109,7 +109,7 @@ async function loadLastWorkout() {
         hideError();
 
         // Fetch activities - we'll get the most recent ones
-        const response = await fetch(`${API_BASE}/athlete/i0/activities`, {
+        const response = await fetch(`${API_BASE}/athlete/0/activities`, {
             headers: {
                 'Authorization': 'Basic ' + btoa('API_KEY:' + apiKey)
             }
