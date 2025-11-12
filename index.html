@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intervals.icu Workout Diary</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- API Key Input Screen -->
+        <div id="apiKeyScreen" class="screen hidden">
+            <header>
+                <h1>🏃 Intervals.icu Workout Diary</h1>
+                <p class="subtitle">Connect your Intervals.icu account</p>
+            </header>
+
+            <div class="api-key-form">
+                <div class="info-box">
+                    <h3>Getting Started</h3>
+                    <ol>
+                        <li>Log in to <a href="https://intervals.icu" target="_blank">Intervals.icu</a></li>
+                        <li>Go to Settings → Developer Settings</li>
+                        <li>Generate an API key</li>
+                        <li>Paste it below</li>
+                    </ol>
+                    <p class="note">Your API key is stored locally in your browser and never sent to any third party.</p>
+                </div>
+
+                <div class="input-group">
+                    <label for="apiKeyInput">API Key</label>
+                    <input
+                        type="password"
+                        id="apiKeyInput"
+                        placeholder="Enter your Intervals.icu API key"
+                        autocomplete="off"
+                    >
+                    <button id="saveApiKeyBtn" class="btn btn-primary">Connect</button>
+                </div>
+
+                <div id="apiKeyError" class="error hidden"></div>
+            </div>
+        </div>
+
+        <!-- Workout Display Screen -->
+        <div id="workoutScreen" class="screen hidden">
+            <header>
+                <div class="header-content">
+                    <div>
+                        <h1>🏃 Intervals.icu Workout Diary</h1>
+                        <p class="subtitle">Last completed workout</p>
+                    </div>
+                    <button id="clearApiKeyBtn" class="btn btn-small">Change API Key</button>
+                </div>
+            </header>
+
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Loading workout data...</p>
+            </div>
+
+            <div id="error" class="error hidden"></div>
+
+            <div id="workoutContent" class="workout-content">
+                <!-- Workout details will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Data provided by <a href="https://intervals.icu" target="_blank">Intervals.icu</a></p>
+        <p>This app stores your API key locally in your browser only</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
