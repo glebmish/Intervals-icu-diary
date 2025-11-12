@@ -112,10 +112,11 @@ async function loadLastWorkout() {
         hideError();
 
         // Fetch activities from the last 30 days (both oldest and newest are required)
+        // Use local dates instead of UTC to avoid timezone issues on iOS
         const today = new Date();
         const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
-        const oldestDate = thirtyDaysAgo.toISOString().split('T')[0]; // Format: YYYY-MM-DD
-        const newestDate = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+        const oldestDate = formatLocalDate(thirtyDaysAgo);
+        const newestDate = formatLocalDate(today);
 
         const credentials = btoa(`API_KEY:${apiKey}`);
         const response = await fetch(`${API_BASE}/athlete/0/activities?oldest=${oldestDate}&newest=${newestDate}`, {
@@ -263,6 +264,14 @@ function renderWorkout(activity) {
     `;
 
     workoutContent.innerHTML = html;
+}
+
+// Format date to local YYYY-MM-DD (not UTC)
+function formatLocalDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 // Format duration from seconds to HH:MM:SS
