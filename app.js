@@ -261,7 +261,7 @@ function renderDaysList() {
                                     ${day.activities.map(activity => {
                                         const activityComplete = isActivityComplete(activity);
                                         return `
-                                            <div class="activity-item ${activityComplete ? 'completed' : 'pending'}" onclick="openActivityFormWrapper(event, ${activity.id})">
+                                            <div class="activity-item ${activityComplete ? 'completed' : 'pending'}" onclick="openActivityFormWrapper(event, '${activity.id}')">
                                                 <div style="display: flex; align-items: center; flex: 1;">
                                                     <span class="activity-type">${activity.type || 'Activity'}</span>
                                                     <span class="activity-name">${activity.name || 'Unnamed Activity'}</span>
@@ -437,7 +437,9 @@ function openActivityFormWrapper(event, activityId) {
     console.log('Activity clicked:', activityId);
     event.stopPropagation();
     event.preventDefault();
-    openActivityForm(activityId);
+    // Convert to number if it's a string
+    const id = typeof activityId === 'string' ? parseInt(activityId) : activityId;
+    openActivityForm(id);
     return false;
 }
 
