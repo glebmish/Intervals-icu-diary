@@ -32,7 +32,7 @@ https://YOUR_USERNAME.github.io/Intervals-icu-diary/
 - HTML5
 - CSS3 (with Flexbox and Grid)
 - Vanilla JavaScript (ES6+)
-- Fetch API with Bearer Token Authentication
+- Fetch API with HTTP Basic Authentication
 - Intervals.icu API
 
 ## Quick Start
@@ -81,7 +81,7 @@ See [GITHUB_PAGES_SETUP.md](GITHUB_PAGES_SETUP.md) for detailed deployment instr
 
 This app uses the official Intervals.icu API:
 - Base URL: `https://intervals.icu/api/v1`
-- Authentication: Bearer Token (API key)
+- Authentication: HTTP Basic Auth (username: "API_KEY", password: your API key)
 - Documentation: https://intervals.icu/api-docs.html
 - Forum: https://forum.intervals.icu/
 

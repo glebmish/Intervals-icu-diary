@@ -152,7 +152,8 @@ To use a custom domain:
 
 This app uses **Intervals.icu API** (https://intervals.icu/api/v1):
 - Official Intervals.icu REST API
-- Requires Bearer Token authentication (API key)
+- Requires HTTP Basic Authentication with API key
+- Username: "API_KEY" (literal string), Password: your API key
 - API keys are generated in your Intervals.icu account settings
 - Endpoints used:
   - `/athlete/0` - Get current athlete information (for validation)
