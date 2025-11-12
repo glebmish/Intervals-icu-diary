@@ -111,13 +111,14 @@ async function loadLastWorkout() {
         showLoading();
         hideError();
 
-        // Fetch activities from the last 30 days
+        // Fetch activities from the last 30 days (both oldest and newest are required)
         const today = new Date();
         const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
         const oldestDate = thirtyDaysAgo.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+        const newestDate = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
 
         const credentials = btoa(`API_KEY:${apiKey}`);
-        const response = await fetch(`${API_BASE}/athlete/0/activities?oldest=${oldestDate}`, {
+        const response = await fetch(`${API_BASE}/athlete/0/activities?oldest=${oldestDate}&newest=${newestDate}`, {
             headers: {
                 'Authorization': `Basic ${credentials}`
             }
