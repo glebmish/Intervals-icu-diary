@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Directory - Test API Demo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌐 User Directory</h1>
+            <p class="subtitle">Fetching data from JSONPlaceholder API</p>
+        </header>
+
+        <div class="controls">
+            <button id="loadUsersBtn" class="btn btn-primary">Load Users</button>
+            <button id="loadPostsBtn" class="btn btn-secondary">Load Posts</button>
+            <button id="loadPhotosBtn" class="btn btn-secondary">Load Photos</button>
+        </div>
+
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Loading data...</p>
+        </div>
+
+        <div id="error" class="error hidden"></div>
+
+        <div id="content" class="content">
+            <p class="info-text">Click a button above to fetch data from the API</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>Data provided by <a href="https://jsonplaceholder.typicode.com/" target="_blank">JSONPlaceholder</a></p>
+        <p>A free fake REST API for testing and prototyping</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
