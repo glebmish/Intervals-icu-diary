@@ -178,6 +178,64 @@
                 </div>
             </div>
         </div>
+
+        <!-- Activity Form Modal -->
+        <div id="activityModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Activity Diary</h2>
+                    <button id="closeActivityModalBtn" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="activityForm">
+                        <input type="hidden" id="activityId">
+
+                        <div class="activity-title" id="activityTitle"></div>
+
+                        <div class="form-group full-width">
+                            <label for="activityDescription">Comments</label>
+                            <textarea id="activityDescription" name="description" class="form-control" rows="4" placeholder="Add notes about this activity..."></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="icuRpe">RPE (Rate of Perceived Exertion)</label>
+                                <select id="icuRpe" name="icu_rpe" class="form-control">
+                                    <option value="">Not set</option>
+                                    <option value="1">1 - Very Easy</option>
+                                    <option value="2">2 - Easy</option>
+                                    <option value="3">3 - Moderate</option>
+                                    <option value="4">4 - Somewhat Hard</option>
+                                    <option value="5">5 - Hard</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7 - Very Hard</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9 - Extremely Hard</option>
+                                    <option value="10">10 - Max Effort</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="feel">Feel</label>
+                                <select id="feel" name="feel" class="form-control">
+                                    <option value="">Not set</option>
+                                    <option value="1">1 - Terrible</option>
+                                    <option value="2">2 - Poor</option>
+                                    <option value="3">3 - Average</option>
+                                    <option value="4">4 - Good</option>
+                                    <option value="5">5 - Great</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" id="cancelActivityBtn" class="btn btn-secondary">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Activity Data</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
     <footer>

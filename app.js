@@ -19,11 +19,19 @@ const wellnessForm = document.getElementById('wellnessForm');
 const wellnessDateInput = document.getElementById('wellnessDate');
 const closeModalBtn = document.getElementById('closeModalBtn');
 const cancelBtn = document.getElementById('cancelBtn');
+const activityModal = document.getElementById('activityModal');
+const activityForm = document.getElementById('activityForm');
+const activityIdInput = document.getElementById('activityId');
+const activityTitle = document.getElementById('activityTitle');
+const closeActivityModalBtn = document.getElementById('closeActivityModalBtn');
+const cancelActivityBtn = document.getElementById('cancelActivityBtn');
 
 // State
 let apiKey = null;
 let wellnessData = [];
+let activitiesData = [];
 let currentEditDate = null;
+let currentEditActivityId = null;
 
 // Initialize app
 function init() {
@@ -32,7 +40,7 @@ function init() {
 
     if (apiKey) {
         showWorkoutScreen();
-        loadWellnessData();
+        loadData();
     } else {
         showApiKeyScreen();
     }
@@ -55,6 +63,18 @@ function init() {
     wellnessModal.addEventListener('click', (e) => {
         if (e.target === wellnessModal) {
             closeModal();
+        }
+    });
+
+    // Activity modal event listeners
+    closeActivityModalBtn.addEventListener('click', closeActivityModal);
+    cancelActivityBtn.addEventListener('click', closeActivityModal);
+    activityForm.addEventListener('submit', handleSubmitActivity);
+
+    // Close activity modal when clicking outside
+    activityModal.addEventListener('click', (e) => {
+        if (e.target === activityModal) {
+            closeActivityModal();
         }
     });
 }
@@ -105,7 +125,7 @@ async function handleSaveApiKey() {
 
         // Switch to workout screen
         showWorkoutScreen();
-        loadWellnessData();
+        loadData();
 
     } catch (error) {
         showApiKeyError('Failed to connect: ' + error.message);
@@ -125,8 +145,8 @@ function handleClearApiKey() {
     }
 }
 
-// Load wellness data for the last N days
-async function loadWellnessData() {
+// Load wellness and activity data for the last N days
+async function loadData() {
     try {
         showLoading();
         hideError();
@@ -138,27 +158,42 @@ async function loadWellnessData() {
         const newestStr = formatLocalDate(today);
 
         const credentials = btoa(`API_KEY:${apiKey}`);
-        const response = await fetch(`${API_BASE}/athlete/0/wellness?oldest=${oldestStr}&newest=${newestStr}`, {
+
+        // Fetch wellness data
+        const wellnessResponse = await fetch(`${API_BASE}/athlete/0/wellness?oldest=${oldestStr}&newest=${newestStr}`, {
             headers: {
                 'Authorization': `Basic ${credentials}`
             }
         });
 
-        if (!response.ok) {
-            if (response.status === 401) {
+        if (!wellnessResponse.ok) {
+            if (wellnessResponse.status === 401) {
                 throw new Error('Invalid API key. Please re-enter your API key.');
             }
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP error! status: ${wellnessResponse.status}`);
         }
 
-        wellnessData = await response.json();
+        wellnessData = await wellnessResponse.json();
+
+        // Fetch activities data
+        const activitiesResponse = await fetch(`${API_BASE}/athlete/0/activities?oldest=${oldestStr}&newest=${newestStr}`, {
+            headers: {
+                'Authorization': `Basic ${credentials}`
+            }
+        });
+
+        if (!activitiesResponse.ok) {
+            throw new Error(`Failed to load activities: ${activitiesResponse.status}`);
+        }
+
+        activitiesData = await activitiesResponse.json();
 
         hideLoading();
         renderDaysList();
 
     } catch (error) {
         hideLoading();
-        showError('Failed to load wellness data: ' + error.message);
+        showError('Failed to load data: ' + error.message);
         console.error('Fetch error:', error);
 
         if (error.message.includes('Invalid API key')) {
@@ -180,10 +215,17 @@ function renderDaysList() {
         // Find wellness data for this date
         const wellness = wellnessData.find(w => w.id === dateStr);
 
+        // Find activities for this date
+        const dayActivities = activitiesData.filter(a => {
+            const activityDate = formatLocalDate(new Date(a.start_date_local));
+            return activityDate === dateStr && a.type !== null; // Only completed activities
+        });
+
         days.push({
             date: date,
             dateStr: dateStr,
-            wellness: wellness || {}
+            wellness: wellness || {},
+            activities: dayActivities
         });
     }
 
@@ -199,16 +241,38 @@ function renderDaysList() {
                 });
 
                 return `
-                    <div class="day-card ${isComplete ? 'completed' : 'pending'}" onclick="openWellnessForm('${day.dateStr}')">
-                        <div class="day-info">
-                            <div class="day-date">${formattedDate}</div>
-                            <div class="day-weekday">${weekday}</div>
-                        </div>
-                        <div class="day-status">
-                            <span class="status-badge ${isComplete ? 'completed' : 'pending'}">
-                                ${isComplete ? 'Complete' : 'Pending'}
-                            </span>
-                            <span class="status-icon">${isComplete ? '✓' : '○'}</span>
+                    <div class="day-card ${isComplete ? 'completed' : 'pending'}">
+                        <div style="flex: 1; width: 100%;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="openWellnessForm('${day.dateStr}')">
+                                <div class="day-info">
+                                    <div class="day-date">${formattedDate}</div>
+                                    <div class="day-weekday">${weekday}</div>
+                                </div>
+                                <div class="day-status">
+                                    <span class="status-badge ${isComplete ? 'completed' : 'pending'}">
+                                        ${isComplete ? 'Complete' : 'Pending'}
+                                    </span>
+                                    <span class="status-icon">${isComplete ? '✓' : '○'}</span>
+                                </div>
+                            </div>
+                            ${day.activities.length > 0 ? `
+                                <div class="day-activities">
+                                    ${day.activities.map(activity => {
+                                        const activityComplete = isActivityComplete(activity);
+                                        return `
+                                            <div class="activity-item ${activityComplete ? 'completed' : 'pending'}" onclick="event.stopPropagation(); openActivityForm(${activity.id})">
+                                                <div style="display: flex; align-items: center; flex: 1;">
+                                                    <span class="activity-type">${activity.type || 'Activity'}</span>
+                                                    <span class="activity-name">${activity.name || 'Unnamed Activity'}</span>
+                                                </div>
+                                                <div class="activity-status">
+                                                    <span class="activity-status-icon">${activityComplete ? '✓' : '○'}</span>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            ` : ''}
                         </div>
                     </div>
                 `;
@@ -330,6 +394,105 @@ async function handleSubmitWellness(e) {
     }
 }
 
+// Check if all required activity fields are filled
+function isActivityComplete(activity) {
+    const requiredFields = ['description', 'icu_rpe', 'feel'];
+
+    return requiredFields.every(field => {
+        const value = activity[field];
+        return value !== null && value !== undefined && value !== '';
+    });
+}
+
+// Open activity form for a specific activity
+function openActivityForm(activityId) {
+    currentEditActivityId = activityId;
+    activityIdInput.value = activityId;
+
+    // Find activity data
+    const activity = activitiesData.find(a => a.id === activityId);
+    if (!activity) return;
+
+    // Set title
+    activityTitle.textContent = activity.name || 'Unnamed Activity';
+
+    // Populate form with existing data
+    document.getElementById('activityDescription').value = activity.description || '';
+    document.getElementById('icuRpe').value = activity.icu_rpe || '';
+    document.getElementById('feel').value = activity.feel || '';
+
+    // Show modal
+    activityModal.classList.remove('hidden');
+}
+
+// Close activity modal
+function closeActivityModal() {
+    activityModal.classList.add('hidden');
+    currentEditActivityId = null;
+    activityForm.reset();
+}
+
+// Handle activity form submission
+async function handleSubmitActivity(e) {
+    e.preventDefault();
+
+    const activityId = activityIdInput.value;
+
+    // Get form values
+    const formData = {
+        description: document.getElementById('activityDescription').value || null,
+        icu_rpe: parseInt(document.getElementById('icuRpe').value) || null,
+        feel: parseInt(document.getElementById('feel').value) || null
+    };
+
+    // Remove null values
+    const cleanedData = {};
+    Object.keys(formData).forEach(key => {
+        if (formData[key] !== null && formData[key] !== '') {
+            cleanedData[key] = formData[key];
+        }
+    });
+
+    try {
+        // Disable submit button
+        const submitBtn = activityForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+
+        const credentials = btoa(`API_KEY:${apiKey}`);
+        const response = await fetch(`${API_BASE}/athlete/0/activities/${activityId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Basic ${credentials}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(cleanedData)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to save: ${response.status}`);
+        }
+
+        // Update local data
+        const existingIndex = activitiesData.findIndex(a => a.id === parseInt(activityId));
+        if (existingIndex >= 0) {
+            activitiesData[existingIndex] = { ...activitiesData[existingIndex], ...cleanedData };
+        }
+
+        // Close modal and refresh display
+        closeActivityModal();
+        renderDaysList();
+
+    } catch (error) {
+        alert('Failed to save activity data: ' + error.message);
+        console.error('Save error:', error);
+    } finally {
+        const submitBtn = activityForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save Activity Data';
+    }
+}
+
 // Format date to local YYYY-MM-DD (not UTC)
 function formatLocalDate(date) {
     const year = date.getFullYear();
@@ -371,8 +534,9 @@ function hideApiKeyError() {
     apiKeyError.classList.add('hidden');
 }
 
-// Make openWellnessForm available globally
+// Make functions available globally for onclick handlers
 window.openWellnessForm = openWellnessForm;
+window.openActivityForm = openActivityForm;
 
 // Start the app
 init();

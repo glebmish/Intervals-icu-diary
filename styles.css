@@ -408,6 +408,64 @@ footer a:hover {
     font-size: 1.5em;
 }
 
+.day-activities {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e9ecef;
+}
+
+.activity-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 8px;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.activity-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.activity-item.completed {
+    border-left-color: #28a745;
+}
+
+.activity-item.pending {
+    border-left-color: #ffc107;
+}
+
+.activity-name {
+    font-size: 0.95em;
+    font-weight: 500;
+    color: #333;
+    flex: 1;
+}
+
+.activity-type {
+    font-size: 0.8em;
+    color: #666;
+    background: #f8f9fa;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 8px;
+}
+
+.activity-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.activity-status-icon {
+    font-size: 1.2em;
+}
+
 /* Modal Styles */
 .modal {
     position: fixed;
@@ -538,6 +596,15 @@ textarea.form-control {
     background: #5a6268;
 }
 
+.activity-title {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e9ecef;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .container {
@@ -606,5 +673,16 @@ textarea.form-control {
 
     .form-actions .btn {
         width: 100%;
+    }
+
+    .activity-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .activity-status {
+        width: 100%;
+        justify-content: flex-end;
     }
 }
