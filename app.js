@@ -2,6 +2,7 @@
 const INTERVALS_ICU_BASE = 'https://intervals.icu';
 const API_BASE = `${INTERVALS_ICU_BASE}/api/v1`;
 const STORAGE_KEY = 'intervals_icu_api_key';
+const DAYS_TO_SHOW = 14; // Show last 14 days
 
 // DOM Elements
 const apiKeyScreen = document.getElementById('apiKeyScreen');
@@ -13,9 +14,16 @@ const apiKeyError = document.getElementById('apiKeyError');
 const loadingDiv = document.getElementById('loading');
 const errorDiv = document.getElementById('error');
 const workoutContent = document.getElementById('workoutContent');
+const wellnessModal = document.getElementById('wellnessModal');
+const wellnessForm = document.getElementById('wellnessForm');
+const wellnessDateInput = document.getElementById('wellnessDate');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const cancelBtn = document.getElementById('cancelBtn');
 
 // State
 let apiKey = null;
+let wellnessData = [];
+let currentEditDate = null;
 
 // Initialize app
 function init() {
@@ -24,7 +32,7 @@ function init() {
 
     if (apiKey) {
         showWorkoutScreen();
-        loadLastWorkout();
+        loadWellnessData();
     } else {
         showApiKeyScreen();
     }
@@ -35,6 +43,18 @@ function init() {
     apiKeyInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             handleSaveApiKey();
+        }
+    });
+
+    // Modal event listeners
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+    wellnessForm.addEventListener('submit', handleSubmitWellness);
+
+    // Close modal when clicking outside
+    wellnessModal.addEventListener('click', (e) => {
+        if (e.target === wellnessModal) {
+            closeModal();
         }
     });
 }
@@ -85,7 +105,7 @@ async function handleSaveApiKey() {
 
         // Switch to workout screen
         showWorkoutScreen();
-        loadLastWorkout();
+        loadWellnessData();
 
     } catch (error) {
         showApiKeyError('Failed to connect: ' + error.message);
@@ -105,21 +125,20 @@ function handleClearApiKey() {
     }
 }
 
-// Fetch last completed workout
-async function loadLastWorkout() {
+// Load wellness data for the last N days
+async function loadWellnessData() {
     try {
         showLoading();
         hideError();
 
-        // Fetch activities from the last 30 days (both oldest and newest are required)
-        // Use local dates instead of UTC to avoid timezone issues on iOS
+        // Calculate date range
         const today = new Date();
-        const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
-        const oldestDate = formatLocalDate(thirtyDaysAgo);
-        const newestDate = formatLocalDate(today);
+        const oldestDate = new Date(today.getTime() - (DAYS_TO_SHOW * 24 * 60 * 60 * 1000));
+        const oldestStr = formatLocalDate(oldestDate);
+        const newestStr = formatLocalDate(today);
 
         const credentials = btoa(`API_KEY:${apiKey}`);
-        const response = await fetch(`${API_BASE}/athlete/0/activities?oldest=${oldestDate}&newest=${newestDate}`, {
+        const response = await fetch(`${API_BASE}/athlete/0/wellness?oldest=${oldestStr}&newest=${newestStr}`, {
             headers: {
                 'Authorization': `Basic ${credentials}`
             }
@@ -132,25 +151,14 @@ async function loadLastWorkout() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const activities = await response.json();
-
-        if (!activities || activities.length === 0) {
-            throw new Error('No activities found');
-        }
-
-        // Get the most recent completed activity (type !== null means it's completed)
-        const lastActivity = activities.find(a => a.type !== null);
-
-        if (!lastActivity) {
-            throw new Error('No completed workouts found');
-        }
+        wellnessData = await response.json();
 
         hideLoading();
-        renderWorkout(lastActivity);
+        renderDaysList();
 
     } catch (error) {
         hideLoading();
-        showError('Failed to load workout: ' + error.message);
+        showError('Failed to load wellness data: ' + error.message);
         console.error('Fetch error:', error);
 
         if (error.message.includes('Invalid API key')) {
@@ -159,111 +167,167 @@ async function loadLastWorkout() {
     }
 }
 
-// Render workout details
-function renderWorkout(activity) {
-    const date = new Date(activity.start_date_local);
-    const formattedDate = date.toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
-    const formattedTime = date.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+// Render list of days
+function renderDaysList() {
+    const days = [];
+    const today = new Date();
 
-    // Convert duration from seconds to formatted time
-    const duration = formatDuration(activity.moving_time || activity.elapsed_time);
+    // Generate array of dates for the last N days
+    for (let i = 0; i < DAYS_TO_SHOW; i++) {
+        const date = new Date(today.getTime() - (i * 24 * 60 * 60 * 1000));
+        const dateStr = formatLocalDate(date);
 
-    // Format distance (meters to km)
-    const distance = activity.distance ? (activity.distance / 1000).toFixed(2) : null;
+        // Find wellness data for this date
+        const wellness = wellnessData.find(w => w.id === dateStr);
+
+        days.push({
+            date: date,
+            dateStr: dateStr,
+            wellness: wellness || {}
+        });
+    }
 
     const html = `
-        <div class="workout-card">
-            <div class="workout-header">
-                <h2>${activity.name || 'Workout'}</h2>
-                <span class="workout-type">${activity.type || 'Activity'}</span>
-            </div>
+        <div class="day-list">
+            ${days.map(day => {
+                const isComplete = isDayComplete(day.wellness);
+                const weekday = day.date.toLocaleDateString('en-US', { weekday: 'long' });
+                const formattedDate = day.date.toLocaleDateString('en-US', {
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
 
-            <div class="workout-date">
-                <strong>${formattedDate}</strong> at ${formattedTime}
-            </div>
-
-            <div class="workout-stats">
-                ${duration ? `
-                    <div class="stat">
-                        <div class="stat-label">Duration</div>
-                        <div class="stat-value">${duration}</div>
+                return `
+                    <div class="day-card ${isComplete ? 'completed' : 'pending'}" onclick="openWellnessForm('${day.dateStr}')">
+                        <div class="day-info">
+                            <div class="day-date">${formattedDate}</div>
+                            <div class="day-weekday">${weekday}</div>
+                        </div>
+                        <div class="day-status">
+                            <span class="status-badge ${isComplete ? 'completed' : 'pending'}">
+                                ${isComplete ? 'Complete' : 'Pending'}
+                            </span>
+                            <span class="status-icon">${isComplete ? '✓' : '○'}</span>
+                        </div>
                     </div>
-                ` : ''}
-
-                ${distance ? `
-                    <div class="stat">
-                        <div class="stat-label">Distance</div>
-                        <div class="stat-value">${distance} km</div>
-                    </div>
-                ` : ''}
-
-                ${activity.average_speed ? `
-                    <div class="stat">
-                        <div class="stat-label">Avg Speed</div>
-                        <div class="stat-value">${(activity.average_speed * 3.6).toFixed(1)} km/h</div>
-                    </div>
-                ` : ''}
-
-                ${activity.average_heartrate ? `
-                    <div class="stat">
-                        <div class="stat-label">Avg HR</div>
-                        <div class="stat-value">${Math.round(activity.average_heartrate)} bpm</div>
-                    </div>
-                ` : ''}
-
-                ${activity.average_watts ? `
-                    <div class="stat">
-                        <div class="stat-label">Avg Power</div>
-                        <div class="stat-value">${Math.round(activity.average_watts)} W</div>
-                    </div>
-                ` : ''}
-
-                ${activity.tss ? `
-                    <div class="stat">
-                        <div class="stat-label">TSS</div>
-                        <div class="stat-value">${Math.round(activity.tss)}</div>
-                    </div>
-                ` : ''}
-
-                ${activity.calories ? `
-                    <div class="stat">
-                        <div class="stat-label">Calories</div>
-                        <div class="stat-value">${activity.calories}</div>
-                    </div>
-                ` : ''}
-
-                ${activity.total_elevation_gain ? `
-                    <div class="stat">
-                        <div class="stat-label">Elevation</div>
-                        <div class="stat-value">${Math.round(activity.total_elevation_gain)} m</div>
-                    </div>
-                ` : ''}
-            </div>
-
-            ${activity.description ? `
-                <div class="workout-description">
-                    <h3>Description</h3>
-                    <p>${activity.description}</p>
-                </div>
-            ` : ''}
-
-            <div class="workout-footer">
-                <a href="${INTERVALS_ICU_BASE}/activities/${activity.id}" target="_blank" class="btn btn-link">
-                    View on Intervals.icu →
-                </a>
-            </div>
+                `;
+            }).join('')}
         </div>
     `;
 
     workoutContent.innerHTML = html;
+}
+
+// Check if all required wellness fields are filled
+function isDayComplete(wellness) {
+    const requiredFields = ['sleepQuality', 'soreness', 'fatigue', 'stress', 'mood', 'motivation', 'injury', 'comments'];
+
+    // Check if wellness object exists and has values for all required fields
+    return requiredFields.every(field => {
+        const value = wellness[field];
+        // Consider field complete if it has a value (including 0, but not null/undefined/empty string)
+        return value !== null && value !== undefined && value !== '';
+    });
+}
+
+// Open wellness form for a specific date
+function openWellnessForm(dateStr) {
+    currentEditDate = dateStr;
+    wellnessDateInput.value = dateStr;
+
+    // Find wellness data for this date
+    const wellness = wellnessData.find(w => w.id === dateStr) || {};
+
+    // Populate form with existing data
+    document.getElementById('sleepQuality').value = wellness.sleepQuality || '';
+    document.getElementById('soreness').value = wellness.soreness !== undefined ? wellness.soreness : '';
+    document.getElementById('fatigue').value = wellness.fatigue !== undefined ? wellness.fatigue : '';
+    document.getElementById('stress').value = wellness.stress !== undefined ? wellness.stress : '';
+    document.getElementById('mood').value = wellness.mood || '';
+    document.getElementById('motivation').value = wellness.motivation || '';
+    document.getElementById('injury').value = wellness.injury || '';
+    document.getElementById('comments').value = wellness.comments || '';
+
+    // Show modal
+    wellnessModal.classList.remove('hidden');
+}
+
+// Close modal
+function closeModal() {
+    wellnessModal.classList.add('hidden');
+    currentEditDate = null;
+    wellnessForm.reset();
+}
+
+// Handle form submission
+async function handleSubmitWellness(e) {
+    e.preventDefault();
+
+    const dateStr = wellnessDateInput.value;
+
+    // Get form values
+    const formData = {
+        id: dateStr,
+        sleepQuality: parseInt(document.getElementById('sleepQuality').value) || null,
+        soreness: document.getElementById('soreness').value !== '' ? parseInt(document.getElementById('soreness').value) : null,
+        fatigue: document.getElementById('fatigue').value !== '' ? parseInt(document.getElementById('fatigue').value) : null,
+        stress: document.getElementById('stress').value !== '' ? parseInt(document.getElementById('stress').value) : null,
+        mood: parseInt(document.getElementById('mood').value) || null,
+        motivation: parseInt(document.getElementById('motivation').value) || null,
+        injury: parseInt(document.getElementById('injury').value) || null,
+        comments: document.getElementById('comments').value || null
+    };
+
+    // Remove null values to avoid overwriting with null
+    const cleanedData = {};
+    Object.keys(formData).forEach(key => {
+        if (formData[key] !== null && formData[key] !== '') {
+            cleanedData[key] = formData[key];
+        }
+    });
+    cleanedData.id = dateStr; // Always include the ID
+
+    try {
+        // Disable submit button
+        const submitBtn = wellnessForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+
+        const credentials = btoa(`API_KEY:${apiKey}`);
+        const response = await fetch(`${API_BASE}/athlete/0/wellness-bulk`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Basic ${credentials}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify([cleanedData])
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to save: ${response.status}`);
+        }
+
+        // Update local data
+        const existingIndex = wellnessData.findIndex(w => w.id === dateStr);
+        if (existingIndex >= 0) {
+            wellnessData[existingIndex] = { ...wellnessData[existingIndex], ...cleanedData };
+        } else {
+            wellnessData.push(cleanedData);
+        }
+
+        // Close modal and refresh display
+        closeModal();
+        renderDaysList();
+
+    } catch (error) {
+        alert('Failed to save wellness data: ' + error.message);
+        console.error('Save error:', error);
+    } finally {
+        const submitBtn = wellnessForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save Wellness Data';
+    }
 }
 
 // Format date to local YYYY-MM-DD (not UTC)
@@ -272,18 +336,6 @@ function formatLocalDate(date) {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
-}
-
-// Format duration from seconds to HH:MM:SS
-function formatDuration(seconds) {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = Math.floor(seconds % 60);
-
-    if (hours > 0) {
-        return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    }
-    return `${minutes}:${secs.toString().padStart(2, '0')}`;
 }
 
 // Show loading spinner
@@ -319,7 +371,10 @@ function hideApiKeyError() {
     apiKeyError.classList.add('hidden');
 }
 
+// Make openWellnessForm available globally
+window.openWellnessForm = openWellnessForm;
+
 // Start the app
 init();
 
-console.log('Intervals.icu Workout Diary initialized!');
+console.log('Intervals.icu Wellness Diary initialized!');
