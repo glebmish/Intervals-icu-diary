@@ -1,5 +1,7 @@
 // Constants
-const API_BASE = 'https://intervals.icu/api/v1';
+const INTERVALS_ICU_BASE = 'https://intervals.icu';
+const API_BASE = `${INTERVALS_ICU_BASE}/api/v1`;
+const API_USERNAME = 'API_KEY';
 const STORAGE_KEY = 'intervals_icu_api_key';
 
 // DOM Elements
@@ -68,7 +70,7 @@ async function handleSaveApiKey() {
     try {
         const response = await fetch(`${API_BASE}/athlete/0`, {
             headers: {
-                'Authorization': 'Basic ' + btoa('API_KEY:' + key)
+                'Authorization': 'Basic ' + btoa(`${API_USERNAME}:${key}`)
             }
         });
 
@@ -111,7 +113,7 @@ async function loadLastWorkout() {
         // Fetch activities - we'll get the most recent ones
         const response = await fetch(`${API_BASE}/athlete/0/activities`, {
             headers: {
-                'Authorization': 'Basic ' + btoa('API_KEY:' + apiKey)
+                'Authorization': 'Basic ' + btoa(`${API_USERNAME}:${apiKey}`)
             }
         });
 
@@ -246,7 +248,7 @@ function renderWorkout(activity) {
             ` : ''}
 
             <div class="workout-footer">
-                <a href="https://intervals.icu/activities/${activity.id}" target="_blank" class="btn btn-link">
+                <a href="${INTERVALS_ICU_BASE}/activities/${activity.id}" target="_blank" class="btn btn-link">
                     View on Intervals.icu →
                 </a>
             </div>
