@@ -381,8 +381,9 @@ function openWellnessForm(dateStr) {
     // Populate textarea
     document.getElementById('comments').value = wellness.comments || '';
 
-    // Show modal
+    // Show modal and lock body scroll
     wellnessModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
 }
 
 // Helper function to reset all button selectors in a form
@@ -401,6 +402,7 @@ function closeModal() {
     currentEditDate = null;
     wellnessForm.reset();
     resetButtonSelectors(wellnessForm);
+    document.body.style.overflow = '';
 }
 
 // Handle form submission
@@ -505,8 +507,9 @@ function openActivityForm(activityId) {
     setButtonSelectorValue('activityRpe', activity.icu_rpe || null);
     setButtonSelectorValue('activityFeel', activity.feel || null);
 
-    // Show modal
+    // Show modal and lock body scroll
     activityModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
 }
 
 // Close activity modal
@@ -515,6 +518,7 @@ function closeActivityModal() {
     currentEditActivityId = null;
     activityForm.reset();
     resetButtonSelectors(activityForm);
+    document.body.style.overflow = '';
 }
 
 // Handle activity form submission
