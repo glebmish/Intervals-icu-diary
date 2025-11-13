@@ -4,7 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Intervals.icu Wellness Diary</title>
-    <link rel="stylesheet" href="styles.css?v=9">
+
+    <!-- Prevent browser caching -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        // Append timestamp to prevent caching
+        document.write('<link rel="stylesheet" href="styles.css?t=' + new Date().getTime() + '">');
+    </script>
 </head>
 <body>
     <div class="container">
@@ -269,6 +279,9 @@
         <p>This app stores your API key locally in your browser only</p>
     </footer>
 
-    <script src="app.js?v=8"></script>
+    <script>
+        // Append timestamp to prevent caching
+        document.write('<script src="app.js?t=' + new Date().getTime() + '"><\/script>');
+    </script>
 </body>
 </html>
