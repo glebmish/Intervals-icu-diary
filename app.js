@@ -256,7 +256,10 @@ function renderDaysList() {
         // Find activities for this date
         const dayActivities = activitiesData.filter(a => {
             const activityDate = formatLocalDate(new Date(a.start_date_local));
-            return activityDate === dateStr && a.type !== null; // Only completed activities
+            // Exclude Strava activities (not editable via API) and incomplete activities
+            return activityDate === dateStr &&
+                   a.type !== null &&
+                   a.source !== 'STRAVA';
         });
 
         days.push({
