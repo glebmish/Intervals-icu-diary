@@ -964,10 +964,10 @@ textarea.form-control {
 }
 
 .events-sidebar {
-    flex: 0 0 60px;
+    flex: 0 0 44px;
     background: #f8f9fa;
     border-radius: 8px;
-    padding: 8px;
+    padding: 4px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -975,7 +975,7 @@ textarea.form-control {
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .btn-icon {
@@ -1032,7 +1032,7 @@ textarea.form-control {
 
 .event-bar {
     position: absolute;
-    left: 8px;
+    left: 4px;
     width: 32px;
     display: flex;
     align-items: center;
