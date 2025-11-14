@@ -324,7 +324,7 @@ function renderDaysList() {
                 });
 
                 return `
-                    <div class="day-card ${isComplete ? 'completed' : 'pending'}">
+                    <div class="day-card ${isComplete ? 'completed' : 'pending'}" data-date="${day.dateStr}">
                         <div style="flex: 1; width: 100%;">
                             <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="openWellnessForm('${day.dateStr}')">
                                 <div class="day-info">
@@ -631,121 +631,123 @@ async function handleSubmitActivity(e) {
     }
 }
 
-// Render events list as timeline
+// Render events list as bars aligned with day cards
 function renderEventsList() {
-    // Filter for events we care about
-    const relevantCategories = ['SICK', 'INJURED', 'HOLIDAY', 'NOTE'];
+    // This will be called after renderDaysList to sync positioning
+    // We need to wait for the DOM to be ready
+    setTimeout(() => {
+        const relevantCategories = ['SICK', 'INJURED', 'HOLIDAY', 'NOTE'];
 
-    // Generate date range for timeline (same as days list)
-    const today = new Date();
-    const dates = [];
-    for (let i = 0; i < DAYS_TO_SHOW; i++) {
-        const date = new Date(today.getTime() - (i * 24 * 60 * 60 * 1000));
-        dates.push({
-            date: date,
-            dateStr: formatLocalDate(date),
-            index: i
+        // Get all day cards from the main list
+        const dayCards = document.querySelectorAll('.day-card');
+        if (dayCards.length === 0) {
+            eventsList.innerHTML = '<p class="no-events">No active events</p>';
+            return;
+        }
+
+        // Build a map of dateStr to card position
+        const datePositions = new Map();
+        dayCards.forEach((card, index) => {
+            const dateStr = card.getAttribute('data-date');
+            if (dateStr) {
+                const rect = card.getBoundingClientRect();
+                const containerRect = eventsList.getBoundingClientRect();
+                datePositions.set(dateStr, {
+                    index: index,
+                    top: rect.top - containerRect.top + eventsList.scrollTop,
+                    height: rect.height
+                });
+            }
         });
-    }
 
-    // Filter events that overlap with our date range
-    const relevantEvents = eventsData.filter(event => {
-        if (!relevantCategories.includes(event.category)) return false;
+        // Generate date range
+        const today = new Date();
+        const dates = [];
+        for (let i = 0; i < DAYS_TO_SHOW; i++) {
+            const date = new Date(today.getTime() - (i * 24 * 60 * 60 * 1000));
+            dates.push({
+                date: date,
+                dateStr: formatLocalDate(date)
+            });
+        }
 
-        const eventStart = new Date(event.start_date_local);
-        const eventEnd = new Date(event.end_date_local || event.start_date_local);
-        const oldestDate = dates[dates.length - 1].date;
-        const newestDate = dates[0].date;
+        // Filter events that overlap with our date range
+        const relevantEvents = eventsData.filter(event => {
+            if (!relevantCategories.includes(event.category)) return false;
 
-        // Check if event overlaps with our date range
-        return eventEnd >= oldestDate && eventStart <= newestDate;
-    });
+            const eventStart = new Date(event.start_date_local);
+            const eventEnd = new Date(event.end_date_local || event.start_date_local);
+            const oldestDate = dates[dates.length - 1].date;
+            const newestDate = dates[0].date;
 
-    const categoryIcons = {
-        'SICK': '🤒',
-        'INJURED': '🤕',
-        'HOLIDAY': '🏖️',
-        'NOTE': '📝'
-    };
+            return eventEnd >= oldestDate && eventStart <= newestDate;
+        });
 
-    const categoryColors = {
-        'SICK': 'var(--event-sick)',
-        'INJURED': 'var(--event-injured)',
-        'HOLIDAY': 'var(--event-holiday)',
-        'NOTE': 'var(--event-note)'
-    };
+        const categoryIcons = {
+            'SICK': '🤒',
+            'INJURED': '🤕',
+            'HOLIDAY': '🏖️',
+            'NOTE': '📝'
+        };
 
-    // Build timeline HTML
-    let timelineHTML = '<div class="events-timeline">';
+        const categoryColors = {
+            'SICK': 'var(--event-sick)',
+            'INJURED': 'var(--event-injured)',
+            'HOLIDAY': 'var(--event-holiday)',
+            'NOTE': 'var(--event-note)'
+        };
 
-    // Render date rows
-    dates.forEach(({date, dateStr, index}) => {
-        const dayNum = date.getDate();
-        const monthShort = date.toLocaleDateString('en-US', { month: 'short' });
+        if (relevantEvents.length === 0) {
+            eventsList.innerHTML = '<p class="no-events">No active events</p>';
+            return;
+        }
 
-        timelineHTML += `
-            <div class="timeline-row" data-date="${dateStr}" data-index="${index}">
-                <div class="timeline-date">
-                    <span class="timeline-day">${dayNum}</span>
-                    <span class="timeline-month">${monthShort}</span>
+        // Build event bars
+        let html = '<div class="events-bars-container">';
+
+        relevantEvents.forEach(event => {
+            const eventStart = new Date(event.start_date_local);
+            const eventEnd = new Date(event.end_date_local || event.start_date_local);
+
+            // Find which days this event spans
+            const spannedDates = dates.filter(({dateStr}) => {
+                const dayDate = new Date(dateStr);
+                return dayDate >= eventStart && dayDate < eventEnd;
+            });
+
+            if (spannedDates.length === 0) return;
+
+            // Get positions for start and end
+            const startDateStr = spannedDates[0].dateStr;
+            const endDateStr = spannedDates[spannedDates.length - 1].dateStr;
+
+            const startPos = datePositions.get(startDateStr);
+            const endPos = datePositions.get(endDateStr);
+
+            if (!startPos || !endPos) return;
+
+            const top = startPos.top;
+            const bottom = endPos.top + endPos.height;
+            const height = bottom - top;
+
+            const icon = categoryIcons[event.category] || '📅';
+            const color = categoryColors[event.category] || '#666';
+
+            html += `
+                <div class="event-bar"
+                     data-event-id="${event.id}"
+                     style="top: ${top}px; height: ${height}px; background-color: ${color}"
+                     title="${event.name}">
+                    <span class="event-bar-icon">${icon}</span>
+                    <span class="event-bar-name">${event.name}</span>
                 </div>
-            </div>
-        `;
-    });
-
-    timelineHTML += '</div>';
-
-    // Build event bars container
-    timelineHTML += '<div class="events-bars">';
-
-    // Calculate and render spanning event bars
-    const ROW_HEIGHT = 60; // Should match CSS min-height
-    relevantEvents.forEach(event => {
-        const eventStart = new Date(event.start_date_local);
-        const eventEnd = new Date(event.end_date_local || event.start_date_local);
-
-        // Find start and end indices
-        let startIndex = -1;
-        let endIndex = -1;
-
-        dates.forEach(({date, index}) => {
-            const dateMs = date.getTime();
-            if (dateMs >= eventStart.getTime() && startIndex === -1) {
-                startIndex = index;
-            }
-            if (dateMs < eventEnd.getTime()) {
-                endIndex = index;
-            }
+            `;
         });
 
-        if (startIndex === -1 || endIndex === -1) return;
+        html += '</div>';
+        eventsList.innerHTML = html;
 
-        // Calculate position and height
-        const top = startIndex * ROW_HEIGHT;
-        const height = (endIndex - startIndex + 1) * ROW_HEIGHT;
-
-        const icon = categoryIcons[event.category] || '📅';
-        const color = categoryColors[event.category] || '#666';
-
-        timelineHTML += `
-            <div class="event-bar"
-                 data-event-id="${event.id}"
-                 style="top: ${top}px; height: ${height}px; background-color: ${color}"
-                 title="${event.name}">
-                <span class="event-bar-icon">${icon}</span>
-                <span class="event-bar-name">${event.name}</span>
-            </div>
-        `;
-    });
-
-    timelineHTML += '</div>';
-
-    if (relevantEvents.length === 0) {
-        eventsList.innerHTML = '<p class="no-events">No active events</p>';
-    } else {
-        eventsList.innerHTML = timelineHTML;
-
-        // Add click handlers for event bars
+        // Add click handlers
         eventsList.querySelectorAll('.event-bar').forEach(item => {
             item.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -753,7 +755,7 @@ function renderEventsList() {
                 openEventForm(eventId);
             });
         });
-    }
+    }, 50); // Small delay to ensure DOM is ready
 }
 
 // Open event form for creating or editing

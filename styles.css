@@ -1020,9 +1020,8 @@ textarea.form-control {
 }
 
 .events-list {
-    display: flex;
-    flex-direction: column;
     position: relative;
+    height: 100%;
 }
 
 .no-events {
@@ -1033,95 +1032,53 @@ textarea.form-control {
     font-style: italic;
 }
 
-/* Timeline styles */
-.events-timeline {
-    display: flex;
-    flex-direction: column;
-    position: relative;
-}
-
-.timeline-row {
-    display: flex;
-    align-items: stretch;
-    min-height: 60px;
-    border-bottom: 1px solid #e9ecef;
-    position: relative;
-}
-
-.timeline-row:last-child {
-    border-bottom: none;
-}
-
-.timeline-date {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 4px;
-}
-
-.timeline-day {
-    font-size: 1.2em;
-    font-weight: 600;
-    color: #2c3e50;
-    line-height: 1;
-}
-
-.timeline-month {
-    font-size: 0.7em;
-    color: #6c757d;
-    text-transform: uppercase;
-    margin-top: 2px;
-}
-
 /* Event bars container */
-.events-bars {
-    position: absolute;
-    top: 0;
-    left: 65px;
-    right: 8px;
-    bottom: 0;
-    pointer-events: none;
+.events-bars-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 500px;
 }
 
 .event-bar {
     position: absolute;
-    left: 0;
-    right: 0;
+    left: 8px;
+    right: 8px;
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 0 8px;
-    border-radius: 4px;
+    padding: 8px;
+    border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s;
     color: white;
     font-size: 0.85em;
     font-weight: 500;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-    pointer-events: auto;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 .event-bar:hover {
-    opacity: 0.9;
-    transform: translateX(2px);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    opacity: 0.95;
+    transform: translateX(-2px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 .event-bar-icon {
-    font-size: 1.1em;
+    font-size: 1.2em;
     line-height: 1;
     flex-shrink: 0;
 }
 
 .event-bar-name {
     flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 0.9em;
     line-height: 1.3;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 .workout-content {
@@ -1178,27 +1135,15 @@ textarea.form-control {
         height: 16px;
     }
 
-    .timeline-row {
-        min-height: 50px;
-    }
-
-    .timeline-day {
-        font-size: 1em;
-    }
-
-    .timeline-month {
-        font-size: 0.65em;
-    }
-
-    .events-bars {
-        left: 55px;
-        right: 4px;
+    .events-bars-container {
+        min-height: 300px;
     }
 
     .event-bar {
-        font-size: 0.8em;
-        padding: 0 6px;
-        border-width: 1px;
+        font-size: 0.75em;
+        padding: 6px;
+        left: 4px;
+        right: 4px;
     }
 
     .event-bar-icon {
@@ -1206,7 +1151,8 @@ textarea.form-control {
     }
 
     .event-bar-name {
-        font-size: 0.9em;
+        font-size: 0.85em;
+        -webkit-line-clamp: 1;
     }
 
     .workout-content {
