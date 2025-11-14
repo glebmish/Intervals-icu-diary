@@ -973,17 +973,9 @@ textarea.form-control {
 
 .events-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid #dee2e6;
-}
-
-.events-header h3 {
-    font-size: 1.1em;
-    color: #2c3e50;
-    font-weight: 600;
+    margin-bottom: 8px;
 }
 
 .btn-icon {
