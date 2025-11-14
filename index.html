@@ -3,15 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Intervals.icu Workout Diary</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Intervals.icu Wellness Diary</title>
+
+    <!-- Prevent browser caching -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <script>
+        // Append timestamp to prevent caching - only load with timestamp
+        var timestamp = new Date().getTime();
+        document.write('<link rel="stylesheet" href="styles.css?t=' + timestamp + '">');
+    </script>
 </head>
 <body>
     <div class="container">
         <!-- API Key Input Screen -->
         <div id="apiKeyScreen" class="screen hidden">
             <header>
-                <h1>🏃 Intervals.icu Workout Diary</h1>
+                <h1>📔 Intervals.icu Wellness Diary</h1>
                 <p class="subtitle">Connect your Intervals.icu account</p>
             </header>
 
@@ -42,13 +52,13 @@
             </div>
         </div>
 
-        <!-- Workout Display Screen -->
+        <!-- Wellness Diary Screen -->
         <div id="workoutScreen" class="screen hidden">
             <header>
                 <div class="header-content">
                     <div>
-                        <h1>🏃 Intervals.icu Workout Diary</h1>
-                        <p class="subtitle">Last completed workout</p>
+                        <h1>📔 Intervals.icu Wellness Diary</h1>
+                        <p class="subtitle">Track your daily wellness</p>
                     </div>
                     <button id="clearApiKeyBtn" class="btn btn-small">Change API Key</button>
                 </div>
@@ -56,13 +66,280 @@
 
             <div id="loading" class="loading hidden">
                 <div class="spinner"></div>
-                <p>Loading workout data...</p>
+                <p>Loading wellness data...</p>
             </div>
 
             <div id="error" class="error hidden"></div>
 
-            <div id="workoutContent" class="workout-content">
-                <!-- Workout details will be inserted here -->
+            <div class="main-layout">
+                <!-- Events Sidebar -->
+                <div class="events-sidebar">
+                    <button id="addEventBtn" class="btn-icon" title="Add Event">+</button>
+                    <div id="eventsList" class="events-list">
+                        <!-- Events will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Wellness Days List -->
+                <div id="workoutContent" class="workout-content">
+                    <!-- Wellness days list will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Wellness Form Modal -->
+        <div id="wellnessModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Wellness Entry</h2>
+                    <button id="closeModalBtn" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="wellnessForm">
+                        <input type="hidden" id="wellnessDate">
+
+                        <!-- Sleep Quality -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">Sleep Quality</label>
+                            <div class="button-selector" data-field="sleepQuality">
+                                <button type="button" class="selector-btn" data-value="1">GREAT</button>
+                                <button type="button" class="selector-btn selected" data-value="2">GOOD</button>
+                                <button type="button" class="selector-btn" data-value="3">AVG</button>
+                                <button type="button" class="selector-btn" data-value="4">POOR</button>
+                            </div>
+                        </div>
+
+                        <!-- Soreness -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">
+                                Soreness
+                                <span class="wellness-subtitle">Pre training</span>
+                            </label>
+                            <div class="button-selector" data-field="soreness">
+                                <button type="button" class="selector-btn selected" data-value="1">LOW</button>
+                                <button type="button" class="selector-btn" data-value="2">AVG</button>
+                                <button type="button" class="selector-btn" data-value="3">HIGH</button>
+                                <button type="button" class="selector-btn" data-value="4">EXTREME</button>
+                            </div>
+                        </div>
+
+                        <!-- Fatigue -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">
+                                Fatigue
+                                <span class="wellness-subtitle">Pre training</span>
+                            </label>
+                            <div class="button-selector" data-field="fatigue">
+                                <button type="button" class="selector-btn selected" data-value="1">LOW</button>
+                                <button type="button" class="selector-btn" data-value="2">AVG</button>
+                                <button type="button" class="selector-btn" data-value="3">HIGH</button>
+                                <button type="button" class="selector-btn" data-value="4">EXTREME</button>
+                            </div>
+                        </div>
+
+                        <!-- Stress -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">Stress</label>
+                            <div class="button-selector" data-field="stress">
+                                <button type="button" class="selector-btn" data-value="1">LOW</button>
+                                <button type="button" class="selector-btn selected" data-value="2">AVG</button>
+                                <button type="button" class="selector-btn" data-value="3">HIGH</button>
+                                <button type="button" class="selector-btn" data-value="4">EXTREME</button>
+                            </div>
+                        </div>
+
+                        <!-- Mood -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">Mood</label>
+                            <div class="button-selector" data-field="mood">
+                                <button type="button" class="selector-btn" data-value="1">GREAT</button>
+                                <button type="button" class="selector-btn" data-value="2">GOOD</button>
+                                <button type="button" class="selector-btn selected" data-value="3">OK</button>
+                                <button type="button" class="selector-btn" data-value="4">GRUMPY</button>
+                            </div>
+                        </div>
+
+                        <!-- Motivation -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">Motivation</label>
+                            <div class="button-selector" data-field="motivation">
+                                <button type="button" class="selector-btn" data-value="1">EXTREME</button>
+                                <button type="button" class="selector-btn" data-value="2">HIGH</button>
+                                <button type="button" class="selector-btn selected" data-value="3">AVG</button>
+                                <button type="button" class="selector-btn" data-value="4">LOW</button>
+                            </div>
+                        </div>
+
+                        <!-- Injury -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">Injury</label>
+                            <div class="button-selector" data-field="injury">
+                                <button type="button" class="selector-btn" data-value="1">NONE</button>
+                                <button type="button" class="selector-btn selected" data-value="2">NIGGLE</button>
+                                <button type="button" class="selector-btn" data-value="3">POOR</button>
+                                <button type="button" class="selector-btn" data-value="4">INJURED</button>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="wellness-field notes-field">
+                            <label class="wellness-label">Notes</label>
+                            <textarea id="comments" name="comments" class="form-control wellness-notes" rows="3" placeholder="Add your daily notes..."></textarea>
+                        </div>
+
+                        <!-- Action Bar -->
+                        <div class="wellness-actions">
+                            <div class="action-buttons-right">
+                                <button type="submit" class="action-btn action-btn-primary">OK & NEXT</button>
+                                <button type="button" id="cancelBtn" class="action-btn">CANCEL</button>
+                                <button type="button" class="action-btn action-btn-primary">OK</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Form Modal -->
+        <div id="activityModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Activity Diary</h2>
+                    <button id="closeActivityModalBtn" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="activityForm">
+                        <input type="hidden" id="activityId">
+
+                        <!-- Comments - Most Prominent -->
+                        <div class="wellness-field notes-field">
+                            <label class="wellness-label prominent-label">Comments</label>
+                            <textarea id="activityDescription" name="description" class="form-control wellness-notes prominent-textarea" rows="4" placeholder="Add notes about this activity..."></textarea>
+                        </div>
+
+                        <!-- Activity Type -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">Activity Type</label>
+                            <select id="activityType" name="type" class="form-control">
+                                <option value="">Not set</option>
+                                <option value="Run">Run</option>
+                                <option value="Ride">Ride</option>
+                                <option value="Swim">Swim</option>
+                                <option value="VirtualRide">Virtual Ride</option>
+                                <option value="VirtualRun">Virtual Run</option>
+                                <option value="Walk">Walk</option>
+                                <option value="Hike">Hike</option>
+                                <option value="WeightTraining">Weight Training</option>
+                                <option value="Workout">Workout</option>
+                                <option value="Yoga">Yoga</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <!-- Activity Name -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">Activity Name</label>
+                            <input type="text" id="activityName" name="name" class="form-control" placeholder="e.g., Morning Run, Evening Ride...">
+                        </div>
+
+                        <!-- RPE -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">RPE (Rate of Perceived Exertion)</label>
+                            <div class="button-selector rpe-selector" data-field="activityRpe">
+                                <button type="button" class="selector-btn" data-value="1">1</button>
+                                <button type="button" class="selector-btn" data-value="2">2</button>
+                                <button type="button" class="selector-btn" data-value="3">3</button>
+                                <button type="button" class="selector-btn" data-value="4">4</button>
+                                <button type="button" class="selector-btn" data-value="5">5</button>
+                                <button type="button" class="selector-btn" data-value="6">6</button>
+                                <button type="button" class="selector-btn" data-value="7">7</button>
+                                <button type="button" class="selector-btn" data-value="8">8</button>
+                                <button type="button" class="selector-btn" data-value="9">9</button>
+                                <button type="button" class="selector-btn" data-value="10">10</button>
+                            </div>
+                        </div>
+
+                        <!-- Feel -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">Feel</label>
+                            <div class="button-selector" data-field="activityFeel">
+                                <button type="button" class="selector-btn" data-value="1">TERRIBLE</button>
+                                <button type="button" class="selector-btn" data-value="2">POOR</button>
+                                <button type="button" class="selector-btn" data-value="3">AVG</button>
+                                <button type="button" class="selector-btn" data-value="4">GOOD</button>
+                                <button type="button" class="selector-btn" data-value="5">GREAT</button>
+                            </div>
+                        </div>
+
+                        <!-- Action Bar -->
+                        <div class="wellness-actions">
+                            <div class="action-buttons-right">
+                                <button type="submit" class="action-btn action-btn-primary">OK & NEXT</button>
+                                <button type="button" id="cancelActivityBtn" class="action-btn">CANCEL</button>
+                                <button type="button" class="action-btn action-btn-primary">OK</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Form Modal -->
+        <div id="eventModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="eventModalTitle">Create Event</h2>
+                    <button id="closeEventModalBtn" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="eventForm">
+                        <input type="hidden" id="eventId">
+
+                        <!-- Event Category -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">Event Type</label>
+                            <select id="eventCategory" name="category" class="form-control" required>
+                                <option value="SICK">🤒 Sick</option>
+                                <option value="INJURED">🤕 Injured</option>
+                                <option value="HOLIDAY">🏖️ Holiday / Travel</option>
+                                <option value="NOTE">📝 Note</option>
+                            </select>
+                        </div>
+
+                        <!-- Event Name -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">Event Name</label>
+                            <input type="text" id="eventName" name="name" class="form-control" placeholder="e.g., Flu recovery, Ski trip..." required>
+                        </div>
+
+                        <!-- Start Date -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">Start Date</label>
+                            <input type="date" id="eventStartDate" name="start_date_local" class="form-control" required>
+                        </div>
+
+                        <!-- End Date -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">End Date</label>
+                            <input type="date" id="eventEndDate" name="end_date_local" class="form-control" required>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="wellness-field notes-field">
+                            <label class="wellness-label">Description (Optional)</label>
+                            <textarea id="eventDescription" name="description" class="form-control wellness-notes" rows="3" placeholder="Add details about this event..."></textarea>
+                        </div>
+
+                        <!-- Action Bar -->
+                        <div class="wellness-actions">
+                            <div class="action-buttons-right">
+                                <button type="submit" class="action-btn action-btn-primary">SAVE</button>
+                                <button type="button" id="cancelEventBtn" class="action-btn">CANCEL</button>
+                                <button type="button" id="deleteEventBtn" class="action-btn action-btn-danger hidden">DELETE</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -72,6 +349,9 @@
         <p>This app stores your API key locally in your browser only</p>
     </footer>
 
-    <script src="app.js"></script>
+    <script>
+        // Append timestamp to prevent caching
+        document.write('<script src="app.js?t=' + new Date().getTime() + '"><\/script>');
+    </script>
 </body>
 </html>
