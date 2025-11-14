@@ -968,8 +968,6 @@ textarea.form-control {
     background: #f8f9fa;
     border-radius: 8px;
     padding: 16px;
-    max-height: calc(100vh - 120px);
-    overflow-y: auto;
     position: sticky;
     top: 20px;
     align-self: flex-start;
