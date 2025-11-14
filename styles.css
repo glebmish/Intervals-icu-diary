@@ -968,9 +968,6 @@ textarea.form-control {
     background: #f8f9fa;
     border-radius: 8px;
     padding: 16px;
-    position: sticky;
-    top: 20px;
-    align-self: flex-start;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -994,8 +991,8 @@ textarea.form-control {
     color: white;
     border: none;
     border-radius: 50%;
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
