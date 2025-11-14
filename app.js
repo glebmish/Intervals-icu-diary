@@ -631,31 +631,34 @@ async function handleSubmitActivity(e) {
     }
 }
 
-// Render events list
+// Render events list as timeline
 function renderEventsList() {
-    // Filter for events we care about (multi-day events)
+    // Filter for events we care about
     const relevantCategories = ['SICK', 'INJURED', 'HOLIDAY', 'NOTE'];
+
+    // Generate date range for timeline (same as days list)
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const dates = [];
+    for (let i = 0; i < DAYS_TO_SHOW; i++) {
+        const date = new Date(today.getTime() - (i * 24 * 60 * 60 * 1000));
+        dates.push({
+            date: date,
+            dateStr: formatLocalDate(date)
+        });
+    }
 
-    // Show events from last 30 days and future
-    const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
-
+    // Filter events that overlap with our date range
     const relevantEvents = eventsData.filter(event => {
         if (!relevantCategories.includes(event.category)) return false;
 
-        // Parse end date (exclusive) to check if event is recent or upcoming
-        const endDate = new Date(event.end_date_local || event.start_date_local);
-        return endDate >= thirtyDaysAgo; // Show recent and future events
-    }).sort((a, b) => {
-        // Sort by start date (most recent first)
-        return new Date(b.start_date_local) - new Date(a.start_date_local);
-    });
+        const eventStart = new Date(event.start_date_local);
+        const eventEnd = new Date(event.end_date_local || event.start_date_local);
+        const oldestDate = dates[dates.length - 1].date;
+        const newestDate = dates[0].date;
 
-    if (relevantEvents.length === 0) {
-        eventsList.innerHTML = '<p class="no-events">No active events</p>';
-        return;
-    }
+        // Check if event overlaps with our date range
+        return eventEnd >= oldestDate && eventStart <= newestDate;
+    });
 
     const categoryIcons = {
         'SICK': '🤒',
@@ -671,45 +674,71 @@ function renderEventsList() {
         'NOTE': 'var(--event-note)'
     };
 
-    const html = relevantEvents.map(event => {
-        const startDate = new Date(event.start_date_local);
-        const endDate = new Date(event.end_date_local || event.start_date_local);
+    // Build timeline HTML
+    let timelineHTML = '<div class="events-timeline">';
 
-        // Calculate days (end_date_local is exclusive)
-        const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
-        const daysText = daysDiff === 1 ? '1 day' : `${daysDiff} days`;
+    // Render each day row
+    dates.forEach(({date, dateStr}) => {
+        const dayNum = date.getDate();
+        const monthShort = date.toLocaleDateString('en-US', { month: 'short' });
 
-        const formattedStart = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        const formattedEnd = new Date(endDate.getTime() - 1).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        const dateRange = daysDiff === 1 ? formattedStart : `${formattedStart} - ${formattedEnd}`;
+        // Find events that span this day
+        const dayEvents = relevantEvents.filter(event => {
+            const eventStart = new Date(event.start_date_local);
+            const eventEnd = new Date(event.end_date_local || event.start_date_local);
+            const dayDate = new Date(dateStr);
 
-        const icon = categoryIcons[event.category] || '📅';
-        const color = categoryColors[event.category] || '#666';
+            // Check if this day falls within the event (inclusive start, exclusive end)
+            return dayDate >= eventStart && dayDate < eventEnd;
+        });
 
-        return `
-            <div class="event-item" data-event-id="${event.id}" style="border-left-color: ${color}">
-                <div class="event-header">
-                    <span class="event-icon">${icon}</span>
-                    <span class="event-name">${event.name}</span>
+        timelineHTML += `
+            <div class="timeline-row">
+                <div class="timeline-date">
+                    <span class="timeline-day">${dayNum}</span>
+                    <span class="timeline-month">${monthShort}</span>
                 </div>
-                <div class="event-details">
-                    <span class="event-date">${dateRange}</span>
-                    <span class="event-duration">${daysText}</span>
+                <div class="timeline-events">
+        `;
+
+        // Render event indicators for this day
+        dayEvents.forEach(event => {
+            const icon = categoryIcons[event.category] || '📅';
+            const color = categoryColors[event.category] || '#666';
+
+            timelineHTML += `
+                <div class="timeline-event"
+                     data-event-id="${event.id}"
+                     style="background-color: ${color}"
+                     title="${event.name}">
+                    <span class="timeline-event-icon">${icon}</span>
+                    <span class="timeline-event-name">${event.name}</span>
                 </div>
-                ${event.description ? `<div class="event-description">${event.description}</div>` : ''}
+            `;
+        });
+
+        timelineHTML += `
+                </div>
             </div>
         `;
-    }).join('');
-
-    eventsList.innerHTML = html;
-
-    // Add click handlers for editing events
-    eventsList.querySelectorAll('.event-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const eventId = parseInt(item.getAttribute('data-event-id'));
-            openEventForm(eventId);
-        });
     });
+
+    timelineHTML += '</div>';
+
+    if (relevantEvents.length === 0) {
+        eventsList.innerHTML = '<p class="no-events">No active events</p>';
+    } else {
+        eventsList.innerHTML = timelineHTML;
+
+        // Add click handlers for event bars
+        eventsList.querySelectorAll('.timeline-event').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const eventId = parseInt(item.getAttribute('data-event-id'));
+                openEventForm(eventId);
+            });
+        });
+    }
 }
 
 // Open event form for creating or editing

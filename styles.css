@@ -20,7 +20,7 @@ body {
 }
 
 .container {
-    max-width: 900px;
+    max-width: 1200px;
     margin: 0 auto;
     background: white;
     border-radius: 8px;
@@ -960,17 +960,20 @@ textarea.form-control {
     display: flex;
     gap: 20px;
     align-items: flex-start;
+    position: relative;
 }
 
 .events-sidebar {
-    flex: 0 0 280px;
+    flex: 0 0 200px;
     background: #f8f9fa;
     border-radius: 8px;
     padding: 16px;
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 120px);
     overflow-y: auto;
     position: sticky;
     top: 20px;
+    align-self: flex-start;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .events-header {
@@ -1019,7 +1022,6 @@ textarea.form-control {
 .events-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
 }
 
 .no-events {
@@ -1030,67 +1032,86 @@ textarea.form-control {
     font-style: italic;
 }
 
-.event-item {
-    background: white;
-    border-radius: 6px;
-    padding: 12px;
-    border-left: 4px solid #3498db;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.event-item:hover {
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    transform: translateX(2px);
-}
-
-.event-header {
+/* Timeline styles */
+.events-timeline {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 6px;
+    flex-direction: column;
 }
 
-.event-icon {
+.timeline-row {
+    display: flex;
+    align-items: stretch;
+    min-height: 60px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.timeline-row:last-child {
+    border-bottom: none;
+}
+
+.timeline-date {
+    flex: 0 0 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 4px;
+    border-right: 2px solid #dee2e6;
+}
+
+.timeline-day {
     font-size: 1.2em;
+    font-weight: 600;
+    color: #2c3e50;
     line-height: 1;
 }
 
-.event-name {
-    font-weight: 600;
-    color: #2c3e50;
-    font-size: 0.95em;
+.timeline-month {
+    font-size: 0.7em;
+    color: #6c757d;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+
+.timeline-events {
     flex: 1;
-}
-
-.event-details {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 4px;
+    padding: 6px 8px;
+    justify-content: center;
+}
+
+.timeline-event {
+    display: flex;
     align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: white;
     font-size: 0.85em;
-    color: #6c757d;
-    margin-top: 4px;
-}
-
-.event-date {
     font-weight: 500;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.event-duration {
-    background: #e9ecef;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.9em;
+.timeline-event:hover {
+    opacity: 0.9;
+    transform: translateX(2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
-.event-description {
-    font-size: 0.85em;
-    color: #6c757d;
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid #e9ecef;
-    line-height: 1.4;
+.timeline-event-icon {
+    font-size: 1em;
+    line-height: 1;
+}
+
+.timeline-event-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .workout-content {
@@ -1120,8 +1141,10 @@ textarea.form-control {
 
     .events-sidebar {
         flex: none;
-        width: 100%;
+        width: calc(100% - 40px);
         position: static;
+        left: auto;
+        top: auto;
         max-height: 300px;
         padding: 12px;
     }
@@ -1145,19 +1168,33 @@ textarea.form-control {
         height: 16px;
     }
 
-    .event-item {
-        padding: 10px;
+    .timeline-row {
+        min-height: 50px;
     }
 
-    .event-name {
-        font-size: 0.9em;
+    .timeline-date {
+        flex: 0 0 40px;
     }
 
-    .event-details {
+    .timeline-day {
+        font-size: 1em;
+    }
+
+    .timeline-month {
+        font-size: 0.65em;
+    }
+
+    .timeline-event {
         font-size: 0.8em;
+        padding: 3px 6px;
+    }
+
+    .timeline-event-name {
+        font-size: 0.9em;
     }
 
     .workout-content {
         width: 100%;
+        margin-left: 0;
     }
 }
