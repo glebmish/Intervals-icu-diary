@@ -739,7 +739,6 @@ function renderEventsList() {
                      style="top: ${top}px; height: ${height}px; background-color: ${color}"
                      title="${event.name}">
                     <span class="event-bar-icon">${icon}</span>
-                    <span class="event-bar-name">${event.name}</span>
                 </div>
             `;
         });
