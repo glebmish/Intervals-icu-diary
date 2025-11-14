@@ -971,14 +971,8 @@ textarea.form-control {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.events-header {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    margin-bottom: 4px;
-}
-
 .btn-icon {
+    margin-bottom: 4px;
     background: #3498db;
     color: white;
     border: none;
