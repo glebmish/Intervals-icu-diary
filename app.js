@@ -638,15 +638,18 @@ function renderEventsList() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    // Show events from last 30 days and future
+    const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+
     const relevantEvents = eventsData.filter(event => {
         if (!relevantCategories.includes(event.category)) return false;
 
-        // Parse end date (exclusive) to check if event is active or upcoming
+        // Parse end date (exclusive) to check if event is recent or upcoming
         const endDate = new Date(event.end_date_local || event.start_date_local);
-        return endDate >= today; // Show current and future events
+        return endDate >= thirtyDaysAgo; // Show recent and future events
     }).sort((a, b) => {
-        // Sort by start date
-        return new Date(a.start_date_local) - new Date(b.start_date_local);
+        // Sort by start date (most recent first)
+        return new Date(b.start_date_local) - new Date(a.start_date_local);
     });
 
     if (relevantEvents.length === 0) {
