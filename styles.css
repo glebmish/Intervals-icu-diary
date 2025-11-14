@@ -1022,6 +1022,7 @@ textarea.form-control {
 .events-list {
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .no-events {
@@ -1036,6 +1037,7 @@ textarea.form-control {
 .events-timeline {
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .timeline-row {
@@ -1043,6 +1045,7 @@ textarea.form-control {
     align-items: stretch;
     min-height: 60px;
     border-bottom: 1px solid #e9ecef;
+    position: relative;
 }
 
 .timeline-row:last-child {
@@ -1050,13 +1053,12 @@ textarea.form-control {
 }
 
 .timeline-date {
-    flex: 0 0 50px;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 8px 4px;
-    border-right: 2px solid #dee2e6;
 }
 
 .timeline-day {
@@ -1073,45 +1075,53 @@ textarea.form-control {
     margin-top: 2px;
 }
 
-.timeline-events {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 6px 8px;
-    justify-content: center;
+/* Event bars container */
+.events-bars {
+    position: absolute;
+    top: 0;
+    left: 65px;
+    right: 8px;
+    bottom: 0;
+    pointer-events: none;
 }
 
-.timeline-event {
+.event-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 4px 8px;
+    padding: 0 8px;
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s;
     color: white;
     font-size: 0.85em;
     font-weight: 500;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    pointer-events: auto;
+    border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
-.timeline-event:hover {
+.event-bar:hover {
     opacity: 0.9;
     transform: translateX(2px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
-.timeline-event-icon {
-    font-size: 1em;
+.event-bar-icon {
+    font-size: 1.1em;
     line-height: 1;
+    flex-shrink: 0;
 }
 
-.timeline-event-name {
+.event-bar-name {
     flex: 1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.3;
 }
 
 .workout-content {
@@ -1172,10 +1182,6 @@ textarea.form-control {
         min-height: 50px;
     }
 
-    .timeline-date {
-        flex: 0 0 40px;
-    }
-
     .timeline-day {
         font-size: 1em;
     }
@@ -1184,12 +1190,22 @@ textarea.form-control {
         font-size: 0.65em;
     }
 
-    .timeline-event {
-        font-size: 0.8em;
-        padding: 3px 6px;
+    .events-bars {
+        left: 55px;
+        right: 4px;
     }
 
-    .timeline-event-name {
+    .event-bar {
+        font-size: 0.8em;
+        padding: 0 6px;
+        border-width: 1px;
+    }
+
+    .event-bar-icon {
+        font-size: 1em;
+    }
+
+    .event-bar-name {
         font-size: 0.9em;
     }
 

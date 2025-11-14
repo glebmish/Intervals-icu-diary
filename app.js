@@ -643,7 +643,8 @@ function renderEventsList() {
         const date = new Date(today.getTime() - (i * 24 * 60 * 60 * 1000));
         dates.push({
             date: date,
-            dateStr: formatLocalDate(date)
+            dateStr: formatLocalDate(date),
+            index: i
         });
     }
 
@@ -677,48 +678,62 @@ function renderEventsList() {
     // Build timeline HTML
     let timelineHTML = '<div class="events-timeline">';
 
-    // Render each day row
-    dates.forEach(({date, dateStr}) => {
+    // Render date rows
+    dates.forEach(({date, dateStr, index}) => {
         const dayNum = date.getDate();
         const monthShort = date.toLocaleDateString('en-US', { month: 'short' });
 
-        // Find events that span this day
-        const dayEvents = relevantEvents.filter(event => {
-            const eventStart = new Date(event.start_date_local);
-            const eventEnd = new Date(event.end_date_local || event.start_date_local);
-            const dayDate = new Date(dateStr);
-
-            // Check if this day falls within the event (inclusive start, exclusive end)
-            return dayDate >= eventStart && dayDate < eventEnd;
-        });
-
         timelineHTML += `
-            <div class="timeline-row">
+            <div class="timeline-row" data-date="${dateStr}" data-index="${index}">
                 <div class="timeline-date">
                     <span class="timeline-day">${dayNum}</span>
                     <span class="timeline-month">${monthShort}</span>
                 </div>
-                <div class="timeline-events">
+            </div>
         `;
+    });
 
-        // Render event indicators for this day
-        dayEvents.forEach(event => {
-            const icon = categoryIcons[event.category] || '📅';
-            const color = categoryColors[event.category] || '#666';
+    timelineHTML += '</div>';
 
-            timelineHTML += `
-                <div class="timeline-event"
-                     data-event-id="${event.id}"
-                     style="background-color: ${color}"
-                     title="${event.name}">
-                    <span class="timeline-event-icon">${icon}</span>
-                    <span class="timeline-event-name">${event.name}</span>
-                </div>
-            `;
+    // Build event bars container
+    timelineHTML += '<div class="events-bars">';
+
+    // Calculate and render spanning event bars
+    const ROW_HEIGHT = 60; // Should match CSS min-height
+    relevantEvents.forEach(event => {
+        const eventStart = new Date(event.start_date_local);
+        const eventEnd = new Date(event.end_date_local || event.start_date_local);
+
+        // Find start and end indices
+        let startIndex = -1;
+        let endIndex = -1;
+
+        dates.forEach(({date, index}) => {
+            const dateMs = date.getTime();
+            if (dateMs >= eventStart.getTime() && startIndex === -1) {
+                startIndex = index;
+            }
+            if (dateMs < eventEnd.getTime()) {
+                endIndex = index;
+            }
         });
 
+        if (startIndex === -1 || endIndex === -1) return;
+
+        // Calculate position and height
+        const top = startIndex * ROW_HEIGHT;
+        const height = (endIndex - startIndex + 1) * ROW_HEIGHT;
+
+        const icon = categoryIcons[event.category] || '📅';
+        const color = categoryColors[event.category] || '#666';
+
         timelineHTML += `
-                </div>
+            <div class="event-bar"
+                 data-event-id="${event.id}"
+                 style="top: ${top}px; height: ${height}px; background-color: ${color}"
+                 title="${event.name}">
+                <span class="event-bar-icon">${icon}</span>
+                <span class="event-bar-name">${event.name}</span>
             </div>
         `;
     });
@@ -731,7 +746,7 @@ function renderEventsList() {
         eventsList.innerHTML = timelineHTML;
 
         // Add click handlers for event bars
-        eventsList.querySelectorAll('.timeline-event').forEach(item => {
+        eventsList.querySelectorAll('.event-bar').forEach(item => {
             item.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const eventId = parseInt(item.getAttribute('data-event-id'));
