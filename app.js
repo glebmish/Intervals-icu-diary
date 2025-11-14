@@ -25,13 +25,24 @@ const activityIdInput = document.getElementById('activityId');
 const activityTitle = document.getElementById('activityTitle');
 const closeActivityModalBtn = document.getElementById('closeActivityModalBtn');
 const cancelActivityBtn = document.getElementById('cancelActivityBtn');
+const eventsList = document.getElementById('eventsList');
+const addEventBtn = document.getElementById('addEventBtn');
+const eventModal = document.getElementById('eventModal');
+const eventForm = document.getElementById('eventForm');
+const eventIdInput = document.getElementById('eventId');
+const eventModalTitle = document.getElementById('eventModalTitle');
+const closeEventModalBtn = document.getElementById('closeEventModalBtn');
+const cancelEventBtn = document.getElementById('cancelEventBtn');
+const deleteEventBtn = document.getElementById('deleteEventBtn');
 
 // State
 let apiKey = null;
 let wellnessData = [];
 let activitiesData = [];
+let eventsData = [];
 let currentEditDate = null;
 let currentEditActivityId = null;
+let currentEditEventId = null;
 
 // Initialize app
 function init() {
@@ -75,6 +86,20 @@ function init() {
     activityModal.addEventListener('click', (e) => {
         if (e.target === activityModal) {
             closeActivityModal();
+        }
+    });
+
+    // Event modal event listeners
+    addEventBtn.addEventListener('click', () => openEventForm());
+    closeEventModalBtn.addEventListener('click', closeEventModal);
+    cancelEventBtn.addEventListener('click', closeEventModal);
+    deleteEventBtn.addEventListener('click', handleDeleteEvent);
+    eventForm.addEventListener('submit', handleSubmitEvent);
+
+    // Close event modal when clicking outside
+    eventModal.addEventListener('click', (e) => {
+        if (e.target === eventModal) {
+            closeEventModal();
         }
     });
 
@@ -226,8 +251,25 @@ async function loadData() {
 
         activitiesData = await activitiesResponse.json();
 
+        // Fetch events data (30 days back to cover multi-day events)
+        const eventsOldestDate = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+        const eventsOldestStr = formatLocalDate(eventsOldestDate);
+        const eventsResponse = await fetch(`${API_BASE}/athlete/0/events?oldest=${eventsOldestStr}&newest=${newestStr}`, {
+            headers: {
+                'Authorization': `Basic ${credentials}`
+            }
+        });
+
+        if (eventsResponse.ok) {
+            eventsData = await eventsResponse.json();
+        } else {
+            console.warn('Failed to load events:', eventsResponse.status);
+            eventsData = [];
+        }
+
         hideLoading();
         renderDaysList();
+        renderEventsList();
 
     } catch (error) {
         hideLoading();
@@ -585,6 +627,263 @@ async function handleSubmitActivity(e) {
         if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.textContent = 'OK & NEXT';
+        }
+    }
+}
+
+// Render events list
+function renderEventsList() {
+    // Filter for events we care about (multi-day events)
+    const relevantCategories = ['SICK', 'INJURED', 'HOLIDAY', 'NOTE'];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const relevantEvents = eventsData.filter(event => {
+        if (!relevantCategories.includes(event.category)) return false;
+
+        // Parse end date (exclusive) to check if event is active or upcoming
+        const endDate = new Date(event.end_date_local || event.start_date_local);
+        return endDate >= today; // Show current and future events
+    }).sort((a, b) => {
+        // Sort by start date
+        return new Date(a.start_date_local) - new Date(b.start_date_local);
+    });
+
+    if (relevantEvents.length === 0) {
+        eventsList.innerHTML = '<p class="no-events">No active events</p>';
+        return;
+    }
+
+    const categoryIcons = {
+        'SICK': '🤒',
+        'INJURED': '🤕',
+        'HOLIDAY': '🏖️',
+        'NOTE': '📝'
+    };
+
+    const categoryColors = {
+        'SICK': 'var(--event-sick)',
+        'INJURED': 'var(--event-injured)',
+        'HOLIDAY': 'var(--event-holiday)',
+        'NOTE': 'var(--event-note)'
+    };
+
+    const html = relevantEvents.map(event => {
+        const startDate = new Date(event.start_date_local);
+        const endDate = new Date(event.end_date_local || event.start_date_local);
+
+        // Calculate days (end_date_local is exclusive)
+        const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+        const daysText = daysDiff === 1 ? '1 day' : `${daysDiff} days`;
+
+        const formattedStart = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const formattedEnd = new Date(endDate.getTime() - 1).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const dateRange = daysDiff === 1 ? formattedStart : `${formattedStart} - ${formattedEnd}`;
+
+        const icon = categoryIcons[event.category] || '📅';
+        const color = categoryColors[event.category] || '#666';
+
+        return `
+            <div class="event-item" data-event-id="${event.id}" style="border-left-color: ${color}">
+                <div class="event-header">
+                    <span class="event-icon">${icon}</span>
+                    <span class="event-name">${event.name}</span>
+                </div>
+                <div class="event-details">
+                    <span class="event-date">${dateRange}</span>
+                    <span class="event-duration">${daysText}</span>
+                </div>
+                ${event.description ? `<div class="event-description">${event.description}</div>` : ''}
+            </div>
+        `;
+    }).join('');
+
+    eventsList.innerHTML = html;
+
+    // Add click handlers for editing events
+    eventsList.querySelectorAll('.event-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const eventId = parseInt(item.getAttribute('data-event-id'));
+            openEventForm(eventId);
+        });
+    });
+}
+
+// Open event form for creating or editing
+function openEventForm(eventId = null) {
+    currentEditEventId = eventId;
+
+    if (eventId) {
+        // Edit mode
+        const event = eventsData.find(e => e.id === eventId);
+        if (!event) return;
+
+        eventModalTitle.textContent = 'Edit Event';
+        deleteEventBtn.classList.remove('hidden');
+
+        eventIdInput.value = event.id;
+        document.getElementById('eventCategory').value = event.category;
+        document.getElementById('eventName').value = event.name;
+
+        // Parse dates - start_date_local is inclusive
+        const startDate = new Date(event.start_date_local);
+        document.getElementById('eventStartDate').value = formatLocalDate(startDate);
+
+        // end_date_local is exclusive, so subtract 1 day for display
+        const endDate = new Date(event.end_date_local || event.start_date_local);
+        const displayEndDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000);
+        document.getElementById('eventEndDate').value = formatLocalDate(displayEndDate);
+
+        document.getElementById('eventDescription').value = event.description || '';
+    } else {
+        // Create mode
+        eventModalTitle.textContent = 'Create Event';
+        deleteEventBtn.classList.add('hidden');
+        eventForm.reset();
+        eventIdInput.value = '';
+
+        // Set default dates to today
+        const today = new Date();
+        document.getElementById('eventStartDate').value = formatLocalDate(today);
+        document.getElementById('eventEndDate').value = formatLocalDate(today);
+    }
+
+    // Show modal and lock body scroll
+    eventModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+// Close event modal
+function closeEventModal() {
+    eventModal.classList.add('hidden');
+    currentEditEventId = null;
+    eventForm.reset();
+    document.body.style.overflow = '';
+}
+
+// Handle event form submission
+async function handleSubmitEvent(e) {
+    e.preventDefault();
+
+    const category = document.getElementById('eventCategory').value;
+    const name = document.getElementById('eventName').value;
+    const startDateStr = document.getElementById('eventStartDate').value;
+    const endDateStr = document.getElementById('eventEndDate').value;
+    const description = document.getElementById('eventDescription').value;
+
+    // Convert dates to ISO format with T00:00:00
+    const startDateLocal = `${startDateStr}T00:00:00`;
+
+    // Add 1 day to end date because end_date_local is exclusive
+    const endDate = new Date(endDateStr);
+    endDate.setDate(endDate.getDate() + 1);
+    const endDateLocal = `${formatLocalDate(endDate)}T00:00:00`;
+
+    const eventData = {
+        category,
+        name,
+        start_date_local: startDateLocal,
+        end_date_local: endDateLocal
+    };
+
+    if (description) {
+        eventData.description = description;
+    }
+
+    try {
+        const submitBtn = eventForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+
+        const credentials = btoa(`API_KEY:${apiKey}`);
+        const eventId = eventIdInput.value;
+        const isEdit = !!eventId;
+
+        const url = isEdit
+            ? `${API_BASE}/athlete/0/events/${eventId}`
+            : `${API_BASE}/athlete/0/events`;
+
+        const method = isEdit ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+            method,
+            headers: {
+                'Authorization': `Basic ${credentials}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(eventData)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to save event: ${response.status}`);
+        }
+
+        const savedEvent = await response.json();
+
+        // Update local data
+        if (isEdit) {
+            const existingIndex = eventsData.findIndex(e => e.id === parseInt(eventId));
+            if (existingIndex >= 0) {
+                eventsData[existingIndex] = savedEvent;
+            }
+        } else {
+            eventsData.push(savedEvent);
+        }
+
+        // Close modal and refresh display
+        closeEventModal();
+        renderEventsList();
+
+    } catch (error) {
+        alert('Failed to save event: ' + error.message);
+        console.error('Save event error:', error);
+    } finally {
+        const submitBtn = eventForm.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'SAVE';
+        }
+    }
+}
+
+// Handle event deletion
+async function handleDeleteEvent() {
+    if (!currentEditEventId) return;
+
+    if (!confirm('Are you sure you want to delete this event?')) {
+        return;
+    }
+
+    try {
+        deleteEventBtn.disabled = true;
+        deleteEventBtn.textContent = 'Deleting...';
+
+        const credentials = btoa(`API_KEY:${apiKey}`);
+        const response = await fetch(`${API_BASE}/athlete/0/events/${currentEditEventId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Basic ${credentials}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to delete event: ${response.status}`);
+        }
+
+        // Remove from local data
+        eventsData = eventsData.filter(e => e.id !== currentEditEventId);
+
+        // Close modal and refresh display
+        closeEventModal();
+        renderEventsList();
+
+    } catch (error) {
+        alert('Failed to delete event: ' + error.message);
+        console.error('Delete event error:', error);
+    } finally {
+        if (deleteEventBtn) {
+            deleteEventBtn.disabled = false;
+            deleteEventBtn.textContent = 'DELETE';
         }
     }
 }

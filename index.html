@@ -71,8 +71,28 @@
 
             <div id="error" class="error hidden"></div>
 
-            <div id="workoutContent" class="workout-content">
-                <!-- Wellness days list will be inserted here -->
+            <div class="main-layout">
+                <!-- Events Sidebar -->
+                <div class="events-sidebar">
+                    <div class="events-header">
+                        <h3>Events</h3>
+                        <button id="addEventBtn" class="btn-icon" title="Add Event">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="16"></line>
+                                <line x1="8" y1="12" x2="16" y2="12"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="eventsList" class="events-list">
+                        <!-- Events will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Wellness Days List -->
+                <div id="workoutContent" class="workout-content">
+                    <!-- Wellness days list will be inserted here -->
+                </div>
             </div>
         </div>
 
@@ -266,6 +286,65 @@
                                 <button type="submit" class="action-btn action-btn-primary">OK & NEXT</button>
                                 <button type="button" id="cancelActivityBtn" class="action-btn">CANCEL</button>
                                 <button type="button" class="action-btn action-btn-primary">OK</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Form Modal -->
+        <div id="eventModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="eventModalTitle">Create Event</h2>
+                    <button id="closeEventModalBtn" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="eventForm">
+                        <input type="hidden" id="eventId">
+
+                        <!-- Event Category -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">Event Type</label>
+                            <select id="eventCategory" name="category" class="form-control" required>
+                                <option value="SICK">🤒 Sick</option>
+                                <option value="INJURED">🤕 Injured</option>
+                                <option value="HOLIDAY">🏖️ Holiday / Travel</option>
+                                <option value="NOTE">📝 Note</option>
+                            </select>
+                        </div>
+
+                        <!-- Event Name -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">Event Name</label>
+                            <input type="text" id="eventName" name="name" class="form-control" placeholder="e.g., Flu recovery, Ski trip..." required>
+                        </div>
+
+                        <!-- Start Date -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">Start Date</label>
+                            <input type="date" id="eventStartDate" name="start_date_local" class="form-control" required>
+                        </div>
+
+                        <!-- End Date -->
+                        <div class="wellness-field">
+                            <label class="wellness-label">End Date</label>
+                            <input type="date" id="eventEndDate" name="end_date_local" class="form-control" required>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="wellness-field notes-field">
+                            <label class="wellness-label">Description (Optional)</label>
+                            <textarea id="eventDescription" name="description" class="form-control wellness-notes" rows="3" placeholder="Add details about this event..."></textarea>
+                        </div>
+
+                        <!-- Action Bar -->
+                        <div class="wellness-actions">
+                            <div class="action-buttons-right">
+                                <button type="submit" class="action-btn action-btn-primary">SAVE</button>
+                                <button type="button" id="cancelEventBtn" class="action-btn">CANCEL</button>
+                                <button type="button" id="deleteEventBtn" class="action-btn action-btn-danger hidden">DELETE</button>
                             </div>
                         </div>
                     </form>
